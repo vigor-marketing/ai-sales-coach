@@ -1,0 +1,199 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String    @id @default(uuid())
+  email     String    @unique
+  name      String
+  password  String
+  role      String    @default("TRAINEE")
+  avatar    String?
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  sessions   TrainingSession[]
+  reports    Report[]
+  
+  @@map("users")
+}
+
+model Document {
+  id          String   @id @default(uuid())
+  filename    String
+  originalName String
+  mimeType    String
+  size        Int
+  parsedText  String?  @map("parsed_text")
+  status      String   @default("PENDING")
+  createdAt   DateTime @default(now()) @map("created_at")
+  
+  knowledgeEntries KnowledgeEntry[]
+  
+  @@map("documents")
+}
+
+model KnowledgeEntry {
+  id         String   @id @default(uuid())
+  question   String
+  answer     String
+  category   String
+  tags       String?  // JSON array of tags
+  sourceDocId String? @map("source_doc_id")
+  document   Document? @relation(fields: [sourceDocId], references: [id])
+  createdAt  DateTime @default(now()) @map("created_at")
+  
+  @@map("knowledge_entries")
+}
+
+model AiRole {
+  id                String   @id @default(uuid())
+  name              String
+  gender            String   @default("MALE") @map("gender")
+  customerType      String   @map("customer_type")
+  region            String
+  position          String
+  annualRevenue     String   @map("annual_revenue")
+  coreTags          String   @map("core_tags")
+  languagePreference String   @map("language_preference")
+  communicationStyle String   @map("communication_style")
+  decisionStyle     String   @map("decision_style")
+  painPoints        String   @map("pain_points")
+  productFocus      String   @map("product_focus")
+  personalityTraits String   @map("personality_traits")
+  promptTemplate    String   @map("prompt_template")
+  avatarUrl         String?  @map("avatar_url")
+  isPreset          Boolean  @default(false) @map("is_preset")
+  createdAt         DateTime @default(now()) @map("created_at")
+  
+  sessions   TrainingSession[]
+  scenarios  RoleScenario[]
+  
+  @@map("ai_roles")
+}
+
+model Scenario {
+  id                String   @id @default(uuid())
+  title             String
+  description       String
+  category          String
+  difficulty        String   @default("MEDIUM")
+  region            String   @default("通用") @map("region") // 匹配角色地区
+  background        String
+  objectives        String
+  evaluationCriteria String   @map("evaluation_criteria")
+  dialogueScript    String?  @map("dialogue_script")
+  successCriteria   String?  @map("success_criteria")
+  failCriteria      String?  @map("fail_criteria")
+  isPreset          Boolean  @default(false) @map("is_preset")
+  createdAt         DateTime @default(now()) @map("created_at")
+  
+  roles      RoleScenario[]
+  sessions   TrainingSession[]
+  
+  @@map("scenarios")
+}
+
+model RoleScenario {
+  id          String   @id @default(uuid())
+  roleId      String   @map("role_id")
+  scenarioId  String   @map("scenario_id")
+  role        AiRole   @relation(fields: [roleId], references: [id])
+  scenario    Scenario @relation(fields: [scenarioId], references: [id])
+  
+  @@unique([roleId, scenarioId])
+  @@map("role_scenarios")
+}
+
+model TrainingSession {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  roleId    String   @map("role_id")
+  scenarioId String? @map("scenario_id")
+  status    String   @default("ACTIVE")
+  startedAt DateTime @default(now()) @map("started_at")
+  endedAt   DateTime? @map("ended_at")
+  
+  user      User     @relation(fields: [userId], references: [id])
+  role      AiRole   @relation(fields: [roleId], references: [id])
+  scenario  Scenario? @relation(fields: [scenarioId], references: [id])
+  messages  Message[]
+  evaluations Evaluation[]
+  report    Report?
+  
+  @@map("training_sessions")
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  sessionId String   @map("session_id")
+  role      String
+  content   String
+  metadata  String?  // JSON: evaluation flags, tokens, etc.
+  createdAt DateTime @default(now()) @map("created_at")
+  
+  session   TrainingSession @relation(fields: [sessionId], references: [id])
+  
+  @@map("messages")
+}
+
+model Evaluation {
+  id        String   @id @default(uuid())
+  sessionId String   @map("session_id")
+  dimension String
+  score     Int      // 0-100
+  feedback  String
+  metadata  String?  // JSON: details, evidences
+  createdAt DateTime @default(now()) @map("created_at")
+  
+  session   TrainingSession @relation(fields: [sessionId], references: [id])
+  
+  @@map("evaluations")
+}
+
+model Report {
+  id              String   @id @default(uuid())
+  sessionId       String   @unique @map("session_id")
+  userId          String   @map("user_id")
+  overallScore    Int      @map("overall_score")
+  radarData       String   @map("radar_data") // JSON
+  strengths       String
+  weaknesses      String
+  recommendations String
+  transcript      String?
+  orderAwarded    Boolean  @default(false) @map("order_awarded")
+  orderReason     String   @default("") @map("order_reason")
+  orderType       String   @default("") @map("order_type") // "询价单" / "正式订单" / "无"
+  createdAt       DateTime @default(now()) @map("created_at")
+  
+  session TrainingSession @relation(fields: [sessionId], references: [id])
+  user    User @relation(fields: [userId], references: [id])
+  
+  @@map("reports")
+}
+
+model Setting {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  @@map("settings")
+}
+
+model Feedback {
+  id        String   @id @default(uuid())
+  userId    String?  @map("user_id")
+  type      String   @default("OTHER") // BUG / FEATURE / IMPROVEMENT / OTHER
+  content   String
+  contact   String?  // 联系方式（可选）
+  status    String   @default("PENDING") // PENDING / REVIEWING / RESOLVED / CLOSED
+  createdAt DateTime @default(now()) @map("created_at")
+  
+  @@map("feedbacks")
+}

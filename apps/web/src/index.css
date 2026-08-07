@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    scroll-behavior: smooth;
+    height: -webkit-fill-available;
+  }
+  body {
+    @apply bg-gradient-to-br from-secondary-50 to-secondary-100 text-secondary-900 antialiased;
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+  }
+  ::selection {
+    @apply bg-primary-200 text-primary-900;
+  }
+  /* Custom scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { @apply bg-transparent; }
+  ::-webkit-scrollbar-thumb { @apply bg-secondary-300 rounded-full hover:bg-secondary-400; }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary-600 to-primary-700
+           text-white font-medium rounded-xl shadow-sm shadow-primary-200
+           hover:from-primary-700 hover:to-primary-800 hover:shadow-md hover:shadow-primary-300
+           active:scale-[0.97] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:active:scale-100;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white text-secondary-700 font-medium rounded-xl
+           border border-secondary-200 shadow-sm
+           hover:bg-secondary-50 hover:border-secondary-300 hover:shadow-md
+           active:scale-[0.97] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 text-secondary-600 font-medium rounded-xl
+           hover:bg-secondary-100 hover:text-secondary-800 active:scale-[0.97] transition-all duration-200;
+  }
+  .card {
+    @apply bg-white rounded-2xl shadow-sm border border-secondary-100 p-5
+           hover:shadow-md hover:border-secondary-200 transition-all duration-200;
+  }
+  .input {
+    @apply w-full px-4 py-2.5 bg-white border border-secondary-200 rounded-xl text-secondary-900 placeholder-secondary-400
+           focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500
+           hover:border-secondary-300 transition-all duration-200;
+  }
+  select.input {
+    @apply appearance-none bg-no-repeat bg-[length:16px] bg-[right_12px_center];
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+  }
+}
