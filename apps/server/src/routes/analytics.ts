@@ -1,13 +1,18 @@
-import { Router, Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { Router, Response } from 'express';
+import { prisma } from '../utils/prisma.js';
+import { authMiddleware, AuthRequest } from '../middleware/auth.js';
 
 const router: Router = Router();
-const prisma = new PrismaClient();
+router.use(authMiddleware);
 
 // GET /api/stats/analytics - Cross-session analytics
-router.get('/', async (req: Request, res: Response) => {
+router.get('/', async (req: AuthRequest, res: Response) => {
   try {
+    // Until the workbench supplies group/department claims, only the legacy
+    // administrator role may read team-wide data. Trainees are restricted to self.
+    const where = req.user!.role === 'ADMIN' ? {} : { userId: req.user!.id };
     const reports = await prisma.report.findMany({
+      where,
       include: {
         session: {
           include: {

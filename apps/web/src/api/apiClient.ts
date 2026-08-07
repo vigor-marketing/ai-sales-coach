@@ -1,7 +1,9 @@
 import axios from 'axios';
 
+const appBasePath = import.meta.env.BASE_URL.replace(/\/$/, '');
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: `${appBasePath}/api`,
   timeout: 300000, // 5 minutes timeout for API calls (evaluation takes up to 5min)
   headers: {
     'Content-Type': 'application/json',
@@ -24,7 +26,7 @@ api.interceptors.response.use(
         const { useAuthStore } = await import('../stores/authStore');
         useAuthStore.getState().logout();
       } catch {}
-      window.location.href = '/';
+      window.location.assign(import.meta.env.BASE_URL);
     }
     return Promise.reject(error);
   }

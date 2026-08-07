@@ -1,0 +1,27 @@
+{
+  "appId": "ai-sales-coach",
+  "name": "AI 销售陪练",
+  "version": "1.1.0",
+  "department": "sales",
+  "entryPath": "/apps/ai-sales-coach/",
+  "healthCheckPath": "/api/health",
+  "embedding": {
+    "mode": "iframe",
+    "frameAncestorsEnv": "FRAME_ANCESTORS",
+    "basePathEnv": "VITE_APP_BASE_PATH"
+  },
+  "authentication": {
+    "current": "local-jwt",
+    "target": "oidc",
+    "requiredForWorkbench": true
+  },
+  "authorization": {
+    "currentRoles": ["ADMIN", "TRAINEE"],
+    "targetScopes": ["self", "team", "sales-management", "executive"]
+  },
+  "api": {
+    "basePath": "/api",
+    "health": "/api/health"
+  },
+  "dataBoundary": "This module owns its training, report, knowledge and file data. Other modules must use versioned APIs or events, never direct database access."
+}

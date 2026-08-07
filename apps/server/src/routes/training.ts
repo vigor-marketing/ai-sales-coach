@@ -129,6 +129,9 @@ router.patch('/sessions/:id/status', async (req: AuthRequest, res: Response) => 
     if (!['ACTIVE', 'PAUSED', 'COMPLETED'].includes(status)) {
       return res.status(400).json({ error: '无效的状态值，允许: ACTIVE/PAUSED/COMPLETED' });
     }
+    if (!(await checkSessionAccess(sessionId, req))) {
+      return res.status(403).json({ error: '无权更新此会话' });
+    }
     const session = await prisma.trainingSession.update({
       where: { id: sessionId },
       data: { status, endedAt: status === 'COMPLETED' ? new Date() : undefined },
