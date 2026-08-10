@@ -47,6 +47,8 @@ router.post('/', adminOnly, async (req: AuthRequest, res) => {
       personalityTraits: req.body.personalityTraits || '',
       promptTemplate: req.body.promptTemplate || '',
       isPreset: false,
+      // 陪练角色只能是模拟资料，绝不建立真实客户关联。
+      trainingDataKind: 'SIMULATED',
     };
     const role = await prisma.aiRole.create({ data });
     res.status(201).json(role);

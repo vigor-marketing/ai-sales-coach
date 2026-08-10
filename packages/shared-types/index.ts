@@ -24,6 +24,7 @@ export interface AiRole {
   promptTemplate: string;
   avatarUrl?: string;
   isPreset: boolean;
+  trainingDataKind: 'SIMULATED';
   createdAt: string;
 }
 

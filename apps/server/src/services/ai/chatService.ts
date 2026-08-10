@@ -62,7 +62,7 @@ export async function generateRoleResponse(
     } else if (isNorthAm) {
       scenarioAlign = '\n\n### 初次接触语境（北美）\n这是初次接触。北美客户效率至上，销售代表会开门见山想快速了解你的需求。你的角色直接但不详细——可以承认"我们在看新供应商"，但别透露具体项目和预算。北美人谈生意不绕弯子，你直接问也是一样直接答。';
     } else {
-      scenarioAlign = '\n\n### 初次接触语境\n这是你和销售代表的第一次对话。对方会试图了解你的需求和背景。你的角色是一个真实的潜在客户——有兴趣但不急切，有需求但不详细。给出模糊的方向，让对方通过提问获取更多信息。';
+      scenarioAlign = '\n\n### 初次接触语境\n这是你和销售代表的第一次模拟对话。对方会试图了解你的需求和背景。你的角色是虚构的训练客户——有兴趣但不急切，有需求但不详细。给出模糊的方向，让对方通过提问获取更多信息。';
     }
   } else if (/技术|评审|方案/i.test(scenarioCat)) {
     if (isTech) {
@@ -93,7 +93,7 @@ export async function generateRoleResponse(
   } else if (/商务|拜访|一般/i.test(scenarioCat)) {
     scenarioAlign = '\n\n### 商务拜访语境\n这是一次例行商务接触。你是务实高效的业务负责人，关注的是结果——对方能提供什么、价格如何、交期多长。不喜欢冗长的寒暄和无关信息。话题专注在业务本身，对方的效率和专业度决定了你是否愿意继续沟通。';
   } else {
-    scenarioAlign = '\n\n### 对话语境\n你和销售代表正在沟通一个潜在的商业机会。你是真实的潜在客户——有采购需求但不会轻易透露全部信息。根据你的角色特征和当前场景，自然地回应对方，不要让对话太快进入详细的技术或价格讨论。';
+    scenarioAlign = '\n\n### 对话语境\n你和销售代表正在进行模拟商业机会训练。你是虚构的训练客户，不对应任何真实客户档案——有采购需求但不会轻易透露全部信息。根据你的角色特征和当前场景，自然地回应对方，不要让对话太快进入详细的技术或价格讨论。';
   }
 
   // 地区特征附加（混入行为规则中让AI更有地区代入感）
@@ -112,7 +112,7 @@ export async function generateRoleResponse(
   const behaviorRule = `
 
 ## 行为规则
-你扮演的是${session.role.region}的${session.role.position}（${session.role.name}），你是一个真实的潜在客户，不是教练或考官。你的性别：${pronoun}。你的角色类型：${session.role.customerType}。${regionFlavor}${scenarioAlign}
+你扮演的是${session.role.region}的${session.role.position}（${session.role.name}），你是一个**虚构的训练客户角色**，不对应任何真实客户、商机、合同或客户档案，也不是教练或考官。你的性别：${pronoun}。你的角色类型：${session.role.customerType}。${regionFlavor}${scenarioAlign}
 
 ### 🎭 你的性格画像
 - 性格：${session.role.personalityTraits || '务实直接'}

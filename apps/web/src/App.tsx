@@ -1,5 +1,6 @@
 import { Component, useEffect, useState } from 'react';
 import { Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
+import api from './api/apiClient';
 
 // Error boundary — auto-reports to server, attempts recovery, then auto-reloads
 const MAX_RETRIES = 2;
@@ -16,15 +17,11 @@ class ErrorBoundary extends Component<{children: React.ReactNode}, {hasError: bo
     console.error('App crashed:', error, info);
     // 1. Auto-report to server
     try {
-      fetch('/api/errors/report', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      api.post('/errors/report', {
           message: error.message,
           stack: error.stack || '',
           url: window.location.href,
           timestamp: new Date().toISOString(),
-        }),
       }).catch(() => {});
     } catch {}
 

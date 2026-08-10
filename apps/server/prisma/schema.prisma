@@ -69,6 +69,7 @@ model AiRole {
   promptTemplate    String   @map("prompt_template")
   avatarUrl         String?  @map("avatar_url")
   isPreset          Boolean  @default(false) @map("is_preset")
+  trainingDataKind  String   @default("SIMULATED") @map("training_data_kind")
   createdAt         DateTime @default(now()) @map("created_at")
   
   sessions   TrainingSession[]
@@ -196,4 +197,18 @@ model Feedback {
   createdAt DateTime @default(now()) @map("created_at")
   
   @@map("feedbacks")
+}
+
+/// 只保存工作台可拉取的最小训练事件，不保存客户、对话原文或报告正文。
+model PlatformEvent {
+  id        String   @id @default(uuid())
+  eventKey  String   @unique @map("event_key")
+  eventType String   @map("event_type")
+  entityType String  @map("entity_type")
+  entityId  String   @map("entity_id")
+  payload   String
+  traceId   String   @map("trace_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("platform_events")
 }

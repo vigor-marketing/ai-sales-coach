@@ -1,15 +1,20 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import crypto from 'crypto';
 
-// Lazy JWT_SECRET loader — reads process.env at call time, not module load time.
-// This ensures dotenv.config() in index.ts has already run before we read the env.
+// Reads process.env at call time so dotenv.config() in index.ts runs first.
 function getJwtSecret(): string {
-  const secret = process.env.JWT_SECRET;
-  if (secret) return secret;
-  const fallback = crypto.createHash('sha256').update('ai-sales-coach-fallback-key-2026').digest('hex');
-  console.error('[auth] JWT_SECRET not set — using deterministic fallback (token will reset after restart!)');
-  return fallback;
+  const secret = process.env.JWT_SECRET?.trim();
+  if (!secret) {
+    throw new Error('JWT_SECRET is required. Refusing to use an insecure fallback secret.');
+  }
+  return secret;
+}
+
+export function assertAuthConfiguration(): void {
+  const secret = getJwtSecret();
+  if (secret.length < 32) {
+    throw new Error('JWT_SECRET must be at least 32 characters long.');
+  }
 }
 
 export interface AuthRequest extends Request {

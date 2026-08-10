@@ -4,6 +4,7 @@ import { generateRoleResponse, generateEvaluation } from '../services/ai/chatSer
 import { generateInsights } from '../services/strategy/strategyService.js';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
 import { cleanupStaleSessions } from '../services/cleanupService.js';
+import { publishTrainingCompleted } from '../services/platformEvents.js';
 
 const router: Router = Router();
 
@@ -128,6 +129,9 @@ router.patch('/sessions/:id/status', async (req: AuthRequest, res: Response) => 
     const { status } = req.body;
     if (!['ACTIVE', 'PAUSED', 'COMPLETED'].includes(status)) {
       return res.status(400).json({ error: '无效的状态值，允许: ACTIVE/PAUSED/COMPLETED' });
+    }
+    if (!(await checkSessionAccess(sessionId, req))) {
+      return res.status(403).json({ error: '无权更新此会话' });
     }
     const session = await prisma.trainingSession.update({
       where: { id: sessionId },
@@ -363,6 +367,8 @@ router.post('/sessions/:id/chat', async (req: AuthRequest, res: Response) => {
         data: { status: 'COMPLETED', endedAt: new Date() },
       });
 
+      await publishTrainingCompleted({ sessionId, reportId: report.id, overallScore: evaluation.overallScore });
+
       // Generate strategy insights in background
       generateInsights(sessionId).catch(e => console.error('Insights error:', e));
 
@@ -456,6 +462,8 @@ router.post('/sessions/:id/evaluate', async (req: AuthRequest, res: Response) =>
       where: { id: sessionId },
       data: { status: 'COMPLETED', endedAt: new Date() },
     });
+
+    await publishTrainingCompleted({ sessionId, reportId: report.id, overallScore: evaluation.overallScore });
 
     // Generate strategy insights in background
     generateInsights(sessionId).catch(e => console.error('Insights error:', e));

@@ -175,9 +175,13 @@ export default function RoleManager() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-2xl font-bold text-secondary-900">角色管理</h2>
-          <p className="text-sm text-secondary-500 mt-1">管理AI陪练客户角色</p>
+          <p className="text-sm text-secondary-500 mt-1">管理 AI 模拟客户角色</p>
         </div>
         {isAdmin && <button onClick={() => setShowForm(true)} className="btn-primary text-sm"><Plus size={16} /> 新增角色</button>}
+      </div>
+
+      <div className="mb-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-relaxed text-amber-800">
+        <strong>训练资料隔离：</strong>这里的角色均为虚构陪练角色，不对应真实客户、商机、合同或报价。请勿录入真实客户名称、联系方式或项目机密。
       </div>
 
       {showForm && (
@@ -186,7 +190,7 @@ export default function RoleManager() {
             <div className="flex items-center justify-between p-5 border-b">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center"><Sparkles size={16} className="text-white" /></div>
-                <h3 className="text-lg font-bold">{editingId ? '编辑角色' : '新建角色'}</h3>
+                <h3 className="text-lg font-bold">{editingId ? '编辑模拟角色' : '新建模拟角色'}</h3>
               </div>
               <button onClick={() => setShowForm(false)} className="p-1 rounded-lg hover:bg-secondary-100"><X size={18} /></button>
             </div>
@@ -197,10 +201,10 @@ export default function RoleManager() {
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <Sparkles size={16} className="text-violet-600" />
-                      <span className="text-xs font-semibold text-violet-700">AI 智能快速创建</span>
+                    <span className="text-xs font-semibold text-violet-700">AI 智能创建模拟角色</span>
                     </div>
                   </div>
-                  <p className="text-[11px] text-violet-500 mb-2">输入一段简单描述，AI自动生成完整角色，你再精细调整</p>
+                  <p className="text-[11px] text-violet-500 mb-2">仅输入虚构训练描述；AI 自动生成角色，你再精细调整</p>
                   <div className="flex gap-2">
                     <input value={quickDesc} onChange={e => setQuickDesc(e.target.value)}
                       placeholder="如：中东石油公司采购经理，价格敏感、决策流程严格，关注本地化要求"
@@ -318,6 +322,7 @@ export default function RoleManager() {
                   <div className="flex items-center gap-1.5 mt-0.5 text-xs text-secondary-500">
                     <Briefcase size={12} /><span className="truncate">{r.position}</span>
                   </div>
+                  <span className="inline-flex mt-1 text-[10px] font-medium rounded-full bg-amber-50 px-1.5 py-0.5 text-amber-700">模拟客户</span>
                   <div className="flex items-center gap-1.5 text-xs text-secondary-500">
                     <Globe size={12} /><span>{r.region}</span>
                   </div>

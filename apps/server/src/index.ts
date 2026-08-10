@@ -6,7 +6,7 @@ import os from 'os';
 import { getUploadsDir } from './utils/storage.js';
 import { fileURLToPath } from 'url';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
-import { authMiddleware } from './middleware/auth.js';
+import { assertAuthConfiguration, authMiddleware } from './middleware/auth.js';
 import authRoutes from './routes/auth.js';
 import roleRoutes from './routes/roles.js';
 import scenarioRoutes from './routes/scenarios.js';
@@ -18,11 +18,13 @@ import aiGenerateRoutes from './routes/aiGenerate.js';
 import feedbackRoutes from './routes/feedback.js';
 import strategyRoutes from './routes/strategy.js';
 import analyticsRoutes from './routes/analytics.js';
+import platformRoutes from './routes/platform.js';
 
 // ── Path setup & .env loading (absolute path, independent of process.cwd()) ─
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
+assertAuthConfiguration();
 
 // ── Global crash handlers ──────────────────────────────────────────────────
 // Node.js 15+ terminates on unhandled rejections. These log then exit
@@ -39,13 +41,27 @@ process.on('uncaughtException', (err) => {
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
 const HOST = process.env.HOST || '0.0.0.0';
+const isProduction = process.env.NODE_ENV === 'production';
+const frameAncestors = process.env.FRAME_ANCESTORS?.trim();
+const allowedOrigins = new Set(
+  (process.env.CORS_ORIGIN || '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean),
+);
+
+if (isProduction && !frameAncestors) {
+  throw new Error('FRAME_ANCESTORS is required in production to restrict iframe embedding.');
+}
+if (isProduction && frameAncestors?.includes('*')) {
+  throw new Error('FRAME_ANCESTORS must not contain a wildcard in production.');
+}
 
 // Security headers. The legacy frame-denial header is omitted because it
 // blocks every cross-origin iframe. Deployments can restrict parents through
 // FRAME_ANCESTORS, for example: "'self' https://portal.example.com".
 app.use((_req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
-  const frameAncestors = process.env.FRAME_ANCESTORS?.trim();
   if (frameAncestors) {
     res.setHeader('Content-Security-Policy', 'frame-ancestors ' + frameAncestors);
   }
@@ -56,7 +72,11 @@ app.use((_req, res, next) => {
 });
 
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || '*',
+  origin: (origin, callback) => {
+    // Requests without Origin are same-origin, health probes, or server-to-server calls.
+    if (!origin || allowedOrigins.has(origin)) return callback(null, true);
+    return callback(null, false);
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
@@ -81,6 +101,7 @@ app.use('/api/ai', aiGenerateRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/strategy', strategyRoutes);
 app.use('/api/stats/analytics', analyticsRoutes);
+app.use('/api/v1', platformRoutes);
 
 // Serve static frontend files (no cache for index.html to ensure latest JS is fetched)
 const staticPath = path.join(__dirname, '../../web/dist');
@@ -95,7 +116,7 @@ app.use(express.static(staticPath, {
 }));
 
 // Frontend error report endpoint — auto-reported by ErrorBoundary
-app.post('/api/errors/report', (req, res) => {
+app.post('/api/errors/report', authMiddleware, (req, res) => {
   const { message, stack, url, timestamp } = req.body || {};
   console.error('\n========================================');
   console.error(`[CLIENT ERROR] ${new Date().toISOString()}`);
