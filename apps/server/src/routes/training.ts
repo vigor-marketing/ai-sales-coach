@@ -4,6 +4,7 @@ import { generateRoleResponse, generateEvaluation } from '../services/ai/chatSer
 import { generateInsights } from '../services/strategy/strategyService.js';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
 import { cleanupStaleSessions } from '../services/cleanupService.js';
+import { publishTrainingCompleted } from '../services/platformEvents.js';
 
 const router: Router = Router();
 
@@ -366,6 +367,8 @@ router.post('/sessions/:id/chat', async (req: AuthRequest, res: Response) => {
         data: { status: 'COMPLETED', endedAt: new Date() },
       });
 
+      await publishTrainingCompleted({ sessionId, reportId: report.id, overallScore: evaluation.overallScore });
+
       // Generate strategy insights in background
       generateInsights(sessionId).catch(e => console.error('Insights error:', e));
 
@@ -459,6 +462,8 @@ router.post('/sessions/:id/evaluate', async (req: AuthRequest, res: Response) =>
       where: { id: sessionId },
       data: { status: 'COMPLETED', endedAt: new Date() },
     });
+
+    await publishTrainingCompleted({ sessionId, reportId: report.id, overallScore: evaluation.overallScore });
 
     // Generate strategy insights in background
     generateInsights(sessionId).catch(e => console.error('Insights error:', e));

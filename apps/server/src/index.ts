@@ -18,6 +18,7 @@ import aiGenerateRoutes from './routes/aiGenerate.js';
 import feedbackRoutes from './routes/feedback.js';
 import strategyRoutes from './routes/strategy.js';
 import analyticsRoutes from './routes/analytics.js';
+import platformRoutes from './routes/platform.js';
 
 // ── Path setup & .env loading (absolute path, independent of process.cwd()) ─
 const __filename = fileURLToPath(import.meta.url);
@@ -100,6 +101,7 @@ app.use('/api/ai', aiGenerateRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/strategy', strategyRoutes);
 app.use('/api/stats/analytics', analyticsRoutes);
+app.use('/api/v1', platformRoutes);
 
 // Serve static frontend files (no cache for index.html to ensure latest JS is fetched)
 const staticPath = path.join(__dirname, '../../web/dist');

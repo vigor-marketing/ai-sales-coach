@@ -663,7 +663,7 @@ export default function TrainingRoom() {
 
         <div className="text-center mb-6">
           <h2 className="text-2xl font-bold text-secondary-900">选择陪练角色和场景</h2>
-          <p className="text-sm text-secondary-500 mt-1">选择完成后即可开始陪练</p>
+          <p className="text-sm text-secondary-500 mt-1">所有角色均为模拟训练资料，不对应真实客户</p>
         </div>
 
         {/* Step 1 - Role Selection */}
@@ -684,6 +684,7 @@ export default function TrainingRoom() {
                   <h3 className="font-semibold text-secondary-900 text-xs truncate">{r.name}</h3>
                   <p className="text-[10px] text-secondary-500 truncate mt-0.5">{r.position}</p>
                   <p className="text-[10px] text-secondary-400 truncate">{r.region}</p>
+                  <span className="inline-flex mt-1 text-[9px] rounded-full bg-amber-50 px-1.5 py-0.5 text-amber-700">模拟客户</span>
                 </div>
               );
             })}
@@ -714,6 +715,7 @@ export default function TrainingRoom() {
                     <div className="flex-1 min-w-0">
                       <h3 className="font-bold text-secondary-900 text-lg">{role.name}</h3>
                       <p className="text-sm text-secondary-500">{role.position} · {role.region}</p>
+                      <p className="mt-1 text-xs font-medium text-amber-700">模拟客户角色，不关联真实客户档案</p>
                       <div className="flex items-center gap-2 mt-2 flex-wrap">
                         {role.coreTags?.split('·').map((t: string, i: number) => (
                           <span key={i} className="text-[11px] bg-primary-50 text-primary-600 px-2 py-0.5 rounded-full">{t.trim()}</span>
@@ -1442,4 +1444,3 @@ export default function TrainingRoom() {
     );
   }
 }
-

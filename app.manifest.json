@@ -23,5 +23,5 @@
     "basePath": "/api",
     "health": "/api/health"
   },
-  "dataBoundary": "This module owns its training, report, knowledge and file data. Other modules must use versioned APIs or events, never direct database access."
+  "dataBoundary": "This module owns simulated training, report, knowledge and file data. AI customer roles are training-only and never map to real customer records. It may publish only minimal ai.training_completed.v1 summaries; other modules must use versioned APIs or events, never direct database access."
 }
