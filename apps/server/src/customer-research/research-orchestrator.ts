@@ -216,6 +216,8 @@ function mergeParsed(result, parsed, request, model) {
 
   result.report = normalizeReport(parsed.report);
   result.report.reportType = mapResearchType(request.researchType);
+  // 将顶层公开职业联系人镜像进 report，使前端"联系信息"模块对真实 AI 报告同样生效
+  result.report.contacts = result.contacts;
   result.confidence = ['low', 'medium', 'high'].includes(parsed.confidence)
     ? parsed.confidence
     : 'low';

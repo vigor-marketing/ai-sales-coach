@@ -72,6 +72,25 @@ router.get('/research-runs/:id', (req: AuthRequest, res: Response) => {
   return res.json(run);
 });
 
+// 审核通过并发布（PENDING_REVIEW → COMPLETED，落审计）
+router.post('/research-runs/:id/approve', (req: AuthRequest, res: Response) => {
+  const run = runs.get(req.params.id);
+  if (!run) return res.status(404).json({ error: 'not_found' });
+  if (run.status !== RESEARCH_STATUS.PENDING_REVIEW) {
+    return res.status(409).json({ error: 'invalid_status', status: run.status, message: '仅「待审核」状态可被审核发布' });
+  }
+  const body = (req.body || {}) as any;
+  const approver = (body.approver && String(body.approver).trim()) || req.user?.name || req.user?.id || 'sales-lead';
+  run.status = RESEARCH_STATUS.COMPLETED;
+  run.approvedBy = approver;
+  run.approvedAt = new Date().toISOString();
+  run.version = (run.version || 0) + 1;
+  run.audit = Array.isArray(run.audit) ? run.audit : [];
+  run.audit.push({ event: 'approved', by: approver, at: run.approvedAt, version: run.version });
+  persistRuns();
+  return res.json(run);
+});
+
 // 历史运行列表（倒序）
 router.get('/research-runs', (_req: AuthRequest, res: Response) => {
   return res.json({ runs: listRuns() });
