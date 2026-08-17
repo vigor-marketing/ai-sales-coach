@@ -4,6 +4,8 @@ import { generateRoleResponse, generateEvaluation } from '../services/ai/chatSer
 import { generateInsights } from '../services/strategy/strategyService.js';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
 import { cleanupStaleSessions } from '../services/cleanupService.js';
+import { publishCoachingCompletedEvent, writeAuditLog } from '../utils/audit.js';
+import { redactSensitiveData } from '../utils/redactSensitiveData.js';
 
 const router: Router = Router();
 
@@ -268,8 +270,9 @@ router.post('/sessions/:id/chat', async (req: AuthRequest, res: Response) => {
     const delayMs = isSimple ? 0 : 500 + Math.floor(Math.random() * 1500); // simple: 0s, normal: 0.5-2s
     await new Promise(r => setTimeout(r, delayMs));
 
-    // Generate AI response
-    const response = await generateRoleResponse(sessionId, message);
+    // Generate AI response. Sensitive identifiers are redacted before model context is built.
+    writeAuditLog({ action: 'ai.invoked', traceId: res.locals.traceId, actorId: req.user!.id, objectId: sessionId, purpose: 'coaching-response', result: 'success' });
+    const response = await generateRoleResponse(sessionId, redactSensitiveData(message));
     console.log(`[Chat ${sessionId.slice(0,8)}] AI response: "${response.slice(0,60)}" skips=${skipCounter.get(sessionId)||0}`);
 
     // Track silent responses — force a reply at least every 4 skips (1 reply per 3-5 messages)
@@ -316,7 +319,7 @@ router.post('/sessions/:id/chat', async (req: AuthRequest, res: Response) => {
       // Create report
       const session = await prisma.trainingSession.findUnique({
         where: { id: sessionId },
-        include: { messages: true },
+        include: { messages: true, user: { select: { teamId: true } } },
       });
 
       const formatRecs = (recs: unknown): string => {
@@ -365,6 +368,14 @@ router.post('/sessions/:id/chat', async (req: AuthRequest, res: Response) => {
 
       // Generate strategy insights in background
       generateInsights(sessionId).catch(e => console.error('Insights error:', e));
+      publishCoachingCompletedEvent({
+        traceId: res.locals.traceId,
+        sessionId,
+        userId: session?.userId || req.user!.id,
+        teamId: session?.user?.teamId,
+        score: evaluation.overallScore,
+        completedAt: new Date(),
+      }).catch(e => console.error('Workbench event error:', e));
 
       return res.json({
         response: cleanedResponse,
@@ -410,7 +421,7 @@ router.post('/sessions/:id/evaluate', async (req: AuthRequest, res: Response) =>
     // Create or update report
     const session = await prisma.trainingSession.findUnique({
       where: { id: sessionId },
-      include: { messages: true },
+      include: { messages: true, user: true },
     });
 
     const formatRecs = (recs: unknown): string => {
@@ -459,6 +470,14 @@ router.post('/sessions/:id/evaluate', async (req: AuthRequest, res: Response) =>
 
     // Generate strategy insights in background
     generateInsights(sessionId).catch(e => console.error('Insights error:', e));
+    publishCoachingCompletedEvent({
+      traceId: res.locals.traceId,
+      sessionId,
+      userId: session?.userId || req.user!.id,
+      teamId: session?.user?.teamId,
+      score: evaluation.overallScore,
+      completedAt: new Date(),
+    }).catch(e => console.error('Workbench event error:', e));
 
     res.json({ ...evaluation, reportId: report.id });
   } catch (error) {

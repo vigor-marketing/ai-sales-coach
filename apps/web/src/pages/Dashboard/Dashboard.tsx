@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { BarChart3, Users, MessageSquare, FileText, ChevronRight, Award, Trash2 } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
 import { deleteSession } from '../../api/apiClient';
+import { API_BASE_PATH } from '../../config/app';
 
 export default function Dashboard() {
   const [stats, setStats] = useState<any>(null);
@@ -24,7 +25,7 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    fetch('/api/training/sessions/stats', {
+    fetch(`${API_BASE_PATH}/training/sessions/stats`, {
       headers: { Authorization: `Bearer ${useAuthStore.getState().token}` }
     }).then(r => r.json().catch(() => null)).then(data => {
       if (data && data.totalSessions !== undefined) {

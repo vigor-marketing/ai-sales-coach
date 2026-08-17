@@ -19,6 +19,7 @@ interface AuthState {
   logout: () => void;
   checkSetup: () => Promise<void>;
   setUser: (user: User) => void;
+  acceptWorkbenchToken: (token: string) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -72,6 +73,18 @@ export const useAuthStore = create<AuthState>()(
 
       setUser: (user: User) => {
         set({ user });
+      },
+      acceptWorkbenchToken: async (token: string) => {
+        set({ loading: true });
+        try {
+          api.defaults.headers.common['Authorization'] = 'Bearer ' + token;
+          const response = await api.get('/auth/me');
+          set({ user: response.data, token, loading: false, needsSetup: false });
+        } catch (error) {
+          delete api.defaults.headers.common['Authorization'];
+          set({ user: null, token: null, loading: false });
+          throw error;
+        }
       },
     }),
     {

@@ -1,5 +1,6 @@
 import { Component, useEffect, useState } from 'react';
 import { Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
+import { API_BASE_PATH } from './config/app';
 
 // Error boundary — auto-reports to server, attempts recovery, then auto-reloads
 const MAX_RETRIES = 2;
@@ -16,7 +17,7 @@ class ErrorBoundary extends Component<{children: React.ReactNode}, {hasError: bo
     console.error('App crashed:', error, info);
     // 1. Auto-report to server
     try {
-      fetch('/api/errors/report', {
+      fetch(`${API_BASE_PATH}/errors/report`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -86,10 +87,9 @@ class ErrorBoundary extends Component<{children: React.ReactNode}, {hasError: bo
   }
 }
 import {
-  LayoutDashboard, BookOpen, Users, MessageSquare, FileText, Settings, Menu, X, LogOut, User, HardHat, Database, MessageCircle, Brain, BarChart3
+  LayoutDashboard, BookOpen, Users, MessageSquare, FileText, Settings, Menu, X, User, HardHat, Database, MessageCircle, Brain, BarChart3
 } from 'lucide-react';
 import { useAuthStore } from './stores/authStore';
-import LoginPage from './pages/Login/LoginPage';
 import Dashboard from './pages/Dashboard/Dashboard';
 import KnowledgeBase from './pages/KnowledgeBase/KnowledgeBase';
 import RoleManager from './pages/RoleManager/RoleManager';
@@ -108,10 +108,9 @@ import ToastContainer from './components/Toast';
 function AppContent() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [showUserMenu, setShowUserMenu] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, logout } = useAuthStore();
+  const { user } = useAuthStore();
 
   // Auto-update page title based on current route
   useEffect(() => {
@@ -208,28 +207,6 @@ function AppContent() {
             </div>
           ))}
         </nav>
-        <div className="p-3 border-t border-secondary-100">
-          <div className="relative">
-            <button onClick={() => setShowUserMenu(!showUserMenu)} className="flex items-center gap-2 w-full p-2 rounded-xl hover:bg-secondary-50 transition-colors">
-              <div className="w-8 h-8 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full flex items-center justify-center shadow-sm shrink-0">
-                <User size={14} className="text-white" />
-              </div>
-              {sidebarOpen && (
-                <div className="flex-1 text-left min-w-0">
-                  <p className="text-sm font-semibold text-secondary-800 truncate">{user?.name}</p>
-                  <p className="text-[11px] text-secondary-400">{user?.role === 'ADMIN' ? '主账号' : '子账号'}</p>
-                </div>
-              )}
-            </button>
-            {showUserMenu && (
-              <div className="absolute bottom-full left-0 right-0 mb-1.5 bg-white rounded-xl shadow-soft border border-secondary-200 py-1 animate-scale-in overflow-hidden">
-                <button onClick={() => { logout(); setShowUserMenu(false); }} className="flex items-center gap-2 w-full px-3 py-2.5 text-sm text-danger hover:bg-danger/5 transition-colors">
-                  <LogOut size={15} /> 退出登录
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
       </aside>
 
       {/* Mobile Header */}
@@ -280,15 +257,6 @@ function AppContent() {
                 </div>
               </div>
             )}
-            <div className="flex items-center gap-2.5 px-3 py-2 text-sm text-secondary-600">
-              <div className="w-7 h-7 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full flex items-center justify-center">
-                <User size={13} className="text-white" />
-              </div>
-              {user?.name} <span className="text-secondary-400">·</span> <span className="text-secondary-400 text-xs">{user?.role === 'ADMIN' ? '主账号' : '子账号'}</span>
-            </div>
-            <button onClick={() => { if (window.confirm('确认退出登录？')) logout(); }} className="flex items-center gap-2 w-full px-3 py-3 text-sm text-danger hover:bg-danger/5 rounded-xl transition-colors">
-              <LogOut size={15} /> 退出登录
-            </button>
           </div>
         </nav>
       </div>
@@ -318,16 +286,32 @@ function AppContent() {
   );
 }
 
-export default function App() {
-  const { user, token } = useAuthStore();
-
-  if (!token || !user) {
-    return <LoginPage />;
-  }
-
-  return (
-    <ErrorBoundary>
-      <AppContent />
-    </ErrorBoundary>
-  );
+function WorkbenchAccessGate() {
+  const { user, token, acceptWorkbenchToken } = useAuthStore();
+  const [status, setStatus] = useState('正在与工作台确认身份…');
+  useEffect(() => {
+    let retryTimer: number | undefined;
+    const requestIdentity = () => window.parent.postMessage(
+      { type: 'vigor.workbench.auth.request.v1' },
+      window.location.origin,
+    );
+    const receive = async (event: MessageEvent) => {
+      if (event.origin !== window.location.origin || event.data?.type !== 'vigor.workbench.auth.response.v1' || typeof event.data.token !== 'string') return;
+      if (retryTimer) window.clearInterval(retryTimer);
+      try { await acceptWorkbenchToken(event.data.token); setStatus('身份已确认，正在进入陪练系统…'); }
+      catch { setStatus('工作台身份验证失败，请返回工作台后重新打开陪练。'); }
+    };
+    window.addEventListener('message', receive);
+    if (window.parent !== window) {
+      requestIdentity();
+      retryTimer = window.setInterval(requestIdentity, 1000);
+    } else setStatus('AI 销售陪练仅可从 Vigor 工作台打开。');
+    return () => {
+      if (retryTimer) window.clearInterval(retryTimer);
+      window.removeEventListener('message', receive);
+    };
+  }, [acceptWorkbenchToken]);
+  if (token && user) return <ErrorBoundary><AppContent /></ErrorBoundary>;
+  return <main className="min-h-screen grid place-items-center bg-[#17191b] p-6"><section className="w-full max-w-md border-t-2 border-[#d92d20] bg-[#f7f7f5] p-9 text-center shadow-[0_20px_50px_rgba(0,0,0,.28)]"><div className="mx-auto grid h-10 w-10 place-items-center bg-[#d92d20] text-lg font-bold text-white">V</div><p className="mt-5 text-[10px] font-semibold tracking-[.18em] text-[#717980]">VIGOR WORKBENCH</p><h1 className="mt-3 text-2xl font-bold tracking-tight text-[#17191b]">AI 销售陪练</h1><p className="mt-3 text-sm leading-6 text-[#657078]">{status}</p><a className="mt-7 inline-flex items-center border-b border-[#d92d20] pb-1 text-sm font-semibold text-[#a61b14]" href="/">返回工作台</a></section></main>;
 }
+export default function App() { return <WorkbenchAccessGate />; }

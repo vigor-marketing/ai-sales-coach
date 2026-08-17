@@ -13,8 +13,10 @@ model User {
   name      String
   password  String
   role      String    @default("TRAINEE")
-  avatar    String?
-  createdAt DateTime  @default(now()) @map("created_at")
+  avatar     String?
+  department String?
+  teamId     String?   @map("team_id")
+  createdAt  DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
 
   sessions   TrainingSession[]

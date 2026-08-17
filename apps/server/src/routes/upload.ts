@@ -4,6 +4,8 @@ import path from 'path';
 import crypto from 'crypto';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
 import { ensureUploadsDir } from '../utils/storage.js';
+import { writeAuditLog } from '../utils/audit.js';
+import { sendApiError } from '../utils/apiResponse.js';
 
 const router: Router = Router();
 router.use(authMiddleware);
@@ -20,9 +22,9 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+  limits: { fileSize: 10 * 1024 * 1024, files: 1 },
   fileFilter: (_req, file, cb) => {
-    const allowed = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.txt'];
+    const allowed = ['.jpg', '.jpeg', '.png', '.webp', '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.txt'];
     const ext = path.extname(file.originalname).toLowerCase();
     if (allowed.includes(ext)) {
       cb(null, true);
@@ -36,7 +38,17 @@ const upload = multer({
 router.post('/', upload.single('file'), async (req: AuthRequest, res: any) => {
   try {
     const file = req.file;
-    if (!file) return res.status(400).json({ error: '请选择文件' });
+    if (!file) return sendApiError(res, 400, 'FILE_REQUIRED', '请选择文件');
+
+    writeAuditLog({
+      action: 'file.uploaded',
+      traceId: res.locals.traceId,
+      actorId: req.user?.id,
+      objectId: file.filename,
+      purpose: 'training-attachment',
+      result: 'success',
+      metadata: { mimeType: file.mimetype, size: file.size },
+    });
 
     const fileUrl = `/uploads/${file.filename}`;
     const isImage = file.mimetype.startsWith('image/');
@@ -50,7 +62,7 @@ router.post('/', upload.single('file'), async (req: AuthRequest, res: any) => {
     });
   } catch (error) {
     console.error('Upload error:', error);
-    res.status(500).json({ error: '文件上传失败' });
+    sendApiError(res, 500, 'FILE_UPLOAD_FAILED', '文件上传失败');
   }
 });
 

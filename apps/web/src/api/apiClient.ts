@@ -1,7 +1,8 @@
 import axios from 'axios';
+import { API_BASE_PATH, appPath } from '../config/app';
 
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: API_BASE_PATH,
   timeout: 300000, // 5 minutes timeout for API calls (evaluation takes up to 5min)
   headers: {
     'Content-Type': 'application/json',
@@ -24,7 +25,7 @@ api.interceptors.response.use(
         const { useAuthStore } = await import('../stores/authStore');
         useAuthStore.getState().logout();
       } catch {}
-      window.location.href = '/';
+      window.location.href = appPath('/');
     }
     return Promise.reject(error);
   }

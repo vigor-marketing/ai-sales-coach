@@ -1,0 +1,80 @@
+openapi: 3.0.3
+info:
+  title: AI 销售陪练工作台只读 API
+  version: 1.0.0
+servers:
+  - url: /
+paths:
+  /api/health:
+    get:
+      summary: 应用健康检查
+      responses:
+        '200':
+          description: 应用可用
+  /api/v1/coaching-sessions:
+    get:
+      summary: 获取经权限过滤的陪练会话摘要
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 会话列表
+  /api/v1/coaching-sessions/{id}:
+    get:
+      summary: 获取单个经权限过滤的陪练会话摘要
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 会话摘要
+        '403':
+          description: 无权访问
+        '404':
+          description: 会话不存在
+  /api/v1/coaching-summary:
+    get:
+      summary: 获取经权限过滤的陪练汇总
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 汇总数据
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    CoachingSession:
+      type: object
+      required: [session_id, user_id, created_at, status]
+      properties:
+        session_id:
+          type: string
+        user_id:
+          type: string
+        team_id:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+        score:
+          type: integer
+          nullable: true
+        status:
+          type: string
+        suggestion_summary:
+          type: string
+          nullable: true

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Send, MessageSquare, Flag, RotateCcw, Paperclip, Check, CheckCheck, Loader2, FileText, X, Reply, PauseCircle, Play, ChevronDown, ChevronUp, Award, TrendingUp, ThumbsUp, ThumbsDown, Zap, AlertTriangle, BarChart3 } from 'lucide-react';
 import { getRoles, getScenarios, createSession, sendMessage, evaluateSession, getMessages, updateSessionStatus, getReport } from '../../api/apiClient';
+import { API_BASE_PATH } from '../../config/app';
 
 export default function TrainingRoom() {
   const navigate = useNavigate();
@@ -325,7 +326,7 @@ export default function TrainingRoom() {
         for (const file of files) {
           const formData = new FormData();
           formData.append('file', file);
-          const res = await fetch('/api/upload', {
+          const res = await fetch(`${API_BASE_PATH}/upload`, {
             method: 'POST',
             headers: { Authorization: `Bearer ${token}` },
             body: formData,

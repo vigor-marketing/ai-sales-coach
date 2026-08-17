@@ -2,6 +2,7 @@ import OpenAI from 'openai';
 import { prisma } from '../../utils/prisma.js';
 import { getInsightsForPrompt } from '../strategy/strategyService.js';
 import type { Message } from '@prisma/client';
+import { redactSensitiveData } from '../../utils/redactSensitiveData.js';
 
 const openai = new OpenAI({
   apiKey: process.env.DEEPSEEK_API_KEY || process.env.OPENAI_API_KEY || '',
@@ -21,6 +22,7 @@ export async function generateRoleResponse(
 
   const systemPrompt = session.role.promptTemplate;
   const roleName = session.role.name || '该客户';
+  const safeUserMessage = redactSensitiveData(userMessage);
 
   const scenarioContext = session.scenario
     ? `当前场景：${session.scenario.title}\n场景描述：${(session.scenario.description||'').replace(/该客户/g,roleName)}\n背景：${(session.scenario.background||'').replace(/该客户/g,roleName)}\n目标：${session.scenario.objectives}`
@@ -161,7 +163,7 @@ export async function generateRoleResponse(
     // Create a condensed summary of early conversation
     const earlySummary = earlyMessages
       .filter(m => m.role !== 'SYSTEM')
-      .map(m => `${m.role === 'USER' ? '销售代表' : '客户'}: ${m.content.slice(0, 100)}`)
+      .map(m => `${m.role === 'USER' ? '销售代表' : '客户'}: ${redactSensitiveData(m.content).slice(0, 100)}`)
       .join('\n');
 
     messages.push({
@@ -172,19 +174,19 @@ export async function generateRoleResponse(
     for (const msg of recentMessages) {
       messages.push({
         role: msg.role === 'USER' ? 'user' : msg.role === 'ASSISTANT' ? 'assistant' : 'system',
-        content: msg.content,
+        content: redactSensitiveData(msg.content),
       });
     }
   } else {
     for (const msg of allMessages) {
       messages.push({
         role: msg.role === 'USER' ? 'user' : msg.role === 'ASSISTANT' ? 'assistant' : 'system',
-        content: msg.content,
+        content: redactSensitiveData(msg.content),
       });
     }
   }
 
-  messages.push({ role: 'user', content: userMessage });
+  messages.push({ role: 'user', content: safeUserMessage });
 
   // Dynamic temperature: early rounds more creative, later rounds more consistent
   const roundCount = session.messages.filter(m => m.role === 'USER' || m.role === 'ASSISTANT').length;
