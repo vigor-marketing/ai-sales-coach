@@ -87,7 +87,7 @@ class ErrorBoundary extends Component<{children: React.ReactNode}, {hasError: bo
   }
 }
 import {
-  LayoutDashboard, BookOpen, Users, MessageSquare, FileText, Settings, Menu, X, User, HardHat, Database, Brain, BarChart3
+  LayoutDashboard, BookOpen, Users, MessageSquare, FileText, Settings, Menu, X, User, HardHat, Database, Brain, BarChart3, Search
 } from 'lucide-react';
 import { useAuthStore } from './stores/authStore';
 import Dashboard from './pages/Dashboard/Dashboard';
@@ -101,6 +101,7 @@ import Analytics from './pages/Analytics/Analytics';
 import SettingsPage from './pages/Settings/Settings';
 import NotFound from './pages/NotFound/NotFound';
 import StrategyInsights from './pages/StrategyInsights/StrategyInsights';
+import CustomerResearch from './pages/CustomerResearch/CustomerResearch';
 import ToastContainer from './components/Toast';
 
 function AppContent() {
@@ -122,6 +123,7 @@ function AppContent() {
       '/analytics': '跨会话分析',
       '/strategy': '策略洞察',
       '/settings': '系统设置',
+      '/customer-research': '客户背调',
     };
     const base = 'AI销售陪练';
     const key = Object.keys(titles).find(k => location.pathname === k || location.pathname.startsWith(k + '/'));
@@ -136,6 +138,7 @@ function AppContent() {
         { path: '/training', icon: MessageSquare, label: '陪练室' },
         { path: '/reports', icon: FileText, label: '评估报告' },
         { path: '/analytics', icon: BarChart3, label: '跨会话分析' },
+        { path: '/customer-research', icon: Search, label: '客户背调' },
       ],
     },
     {
@@ -270,6 +273,7 @@ function AppContent() {
             <Route path="/reports/:id" element={<ReportDetail />} />
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/strategy" element={<StrategyInsights />} />
+            <Route path="/customer-research" element={<CustomerResearch />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

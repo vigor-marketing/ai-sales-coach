@@ -1,0 +1,44 @@
+{
+  "region": "global",
+  "targetCount": 50,
+  "refreshFrequency": "daily",
+  "requiredCountries": [
+    "Norway",
+    "United Kingdom",
+    "Nigeria",
+    "Angola",
+    "Brazil"
+  ],
+  "requiredIndustries": [
+    "Oilfield service",
+    "Drilling",
+    "Manufacturer",
+    "Project contractor",
+    "EPC"
+  ],
+  "ttlDays": 30,
+  "intervalSeconds": 86400,
+  "inclusionCriteria": "仅纳入公开来源可核验的主体；员工规模 100+ 或未知需人工复核；自动剔除 <100 员工企业；重复主体按域名与注册号消歧。",
+  "allowedSources": [
+    {
+      "country": "Norway",
+      "name": "Norwegian Offshore Directorate"
+    },
+    {
+      "country": "United Kingdom",
+      "name": "UK Energy Licensing Portal"
+    },
+    {
+      "country": "Nigeria",
+      "name": "NUPRC (Nigerian Upstream Petroleum Regulator)"
+    },
+    {
+      "country": "Angola",
+      "name": "Angola ANPG"
+    },
+    {
+      "country": "Brazil",
+      "name": "ANP (Agência Nacional do Petróleo)"
+    }
+  ]
+}

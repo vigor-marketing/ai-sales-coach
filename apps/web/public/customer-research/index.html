@@ -1,0 +1,1521 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Vigor 客户背调与销售研究 MVP 原型" />
+  <title>Vigor | 客户背调与销售研究</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --surface: #ffffff;
+      --surface-soft: #f8fafc;
+      --ink: #172033;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --primary-soft: #eff6ff;
+      --success: #059669;
+      --success-soft: #ecfdf5;
+      --warning: #b45309;
+      --warning-soft: #fffbeb;
+      --danger: #dc2626;
+      --danger-soft: #fef2f2;
+      --purple: #7c3aed;
+      --purple-soft: #f5f3ff;
+      --radius: 12px;
+      --shadow: 0 1px 2px rgba(15, 23, 42, .06), 0 1px 3px rgba(15, 23, 42, .04);
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-width: 320px; color: var(--ink); background: var(--bg); font-size: 14px; }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid rgba(37, 99, 235, .28); outline-offset: 2px; }
+    .app { min-height: 100vh; display: flex; }
+    .sidebar { width: 250px; flex: 0 0 250px; background: var(--surface); border-right: 1px solid var(--line); padding: 20px 12px; display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; }
+    .brand { display: flex; align-items: center; gap: 10px; padding: 0 10px 22px; border-bottom: 1px solid var(--line); }
+    .brand-mark { width: 30px; height: 30px; display: grid; place-items: center; color: white; border-radius: 8px; background: linear-gradient(135deg, #2563eb, #1e40af); font-size: 13px; font-weight: 800; }
+    .brand strong { display: block; font-size: 14px; }
+    .brand small { display: block; margin-top: 2px; font-size: 11px; color: var(--muted); }
+    .nav-label { color: #94a3b8; font-size: 10px; font-weight: 700; letter-spacing: .08em; padding: 22px 10px 8px; text-transform: uppercase; }
+    .nav { display: grid; gap: 3px; }
+    .nav button { border: 0; background: transparent; color: #475569; min-height: 38px; border-radius: 8px; text-align: left; padding: 0 10px; display: flex; align-items: center; gap: 10px; font-weight: 600; }
+    .nav button:hover { background: #f8fafc; color: var(--ink); }
+    .nav button.active { color: #1d4ed8; background: linear-gradient(90deg, #eff6ff, #f8fbff); }
+    .nav-icon { width: 18px; color: currentColor; text-align: center; font-size: 16px; }
+    .nav-spacer { flex: 1; }
+    .user-box { display: flex; gap: 9px; align-items: center; padding: 11px 10px; border-radius: 10px; background: var(--surface-soft); }
+    .avatar { width: 30px; height: 30px; display: grid; place-items: center; background: #dbeafe; color: #1d4ed8; border-radius: 50%; font-size: 12px; font-weight: 800; }
+    .user-box strong { display: block; font-size: 12px; }
+    .user-box small { color: var(--muted); font-size: 11px; }
+    .main { min-width: 0; flex: 1; }
+    .topbar { height: 64px; border-bottom: 1px solid var(--line); background: rgba(255,255,255,.94); display: flex; align-items: center; justify-content: space-between; padding: 0 32px; position: sticky; top: 0; z-index: 10; backdrop-filter: blur(10px); }
+    .crumb { color: var(--muted); font-size: 12px; }
+    .crumb strong { color: #334155; }
+    .top-actions { display: flex; align-items: center; gap: 10px; }
+    .icon-button { height: 34px; width: 34px; border: 1px solid var(--line); background: white; border-radius: 8px; color: #475569; }
+    .content { max-width: 1480px; margin: 0 auto; padding: 30px 32px 50px; }
+    .page { display: none; }
+    .page.active { display: block; }
+    .page-head { display: flex; gap: 18px; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; }
+    h1 { font-size: 25px; line-height: 1.2; margin: 0; letter-spacing: 0; }
+    h2 { font-size: 16px; margin: 0; }
+    h3 { font-size: 14px; margin: 0; }
+    .lede { color: var(--muted); margin: 7px 0 0; font-size: 13px; line-height: 1.55; }
+    .button { border: 1px solid transparent; min-height: 38px; padding: 0 13px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; border-radius: 9px; font-weight: 700; font-size: 13px; white-space: nowrap; }
+    .button.primary { color: white; background: linear-gradient(135deg, #2563eb, #1d4ed8); box-shadow: 0 3px 8px rgba(37,99,235,.18); }
+    .button.primary:hover { background: #1d4ed8; }
+    .button.secondary { color: #334155; border-color: var(--line); background: white; }
+    .button.secondary:hover { background: #f8fafc; }
+    .button.ghost { background: transparent; color: #475569; }
+    .button.ghost:hover { background: #f1f5f9; }
+    .button.warning { color: #92400e; background: var(--warning-soft); border-color: #fde68a; }
+    .metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .metric { min-height: 126px; padding: 18px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
+    .metric-top { display: flex; justify-content: space-between; align-items: center; }
+    .metric-icon { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 9px; font-size: 16px; }
+    .metric-icon.blue { background: #eff6ff; color: #2563eb; }
+    .metric-icon.amber { background: #fffbeb; color: #b45309; }
+    .metric-icon.green { background: #ecfdf5; color: #059669; }
+    .metric-icon.red { background: #fef2f2; color: #dc2626; }
+    .metric-value { margin-top: 17px; font-size: 27px; font-weight: 800; letter-spacing: 0; }
+    .metric-label { display: block; color: var(--muted); margin-top: 3px; font-size: 12px; }
+    .layout { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(280px, .75fr); gap: 18px; }
+    .panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
+    .panel-head { min-height: 58px; display: flex; gap: 14px; align-items: center; justify-content: space-between; padding: 0 18px; border-bottom: 1px solid var(--line); }
+    .panel-head small { color: var(--muted); }
+    .panel-body { padding: 15px 18px; }
+    .task-row { display: grid; grid-template-columns: 1.4fr .8fr .7fr .8fr auto; gap: 12px; align-items: center; padding: 13px 0; border-bottom: 1px solid #eef2f7; }
+    .task-row:last-child { border-bottom: 0; }
+    .task-name { font-weight: 750; font-size: 13px; }
+    .task-sub { display: block; color: var(--muted); margin-top: 3px; font-size: 11px; }
+    .pill { display: inline-flex; align-items: center; gap: 5px; width: fit-content; min-height: 22px; border-radius: 999px; padding: 0 8px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+    .pill.blue { color: #1d4ed8; background: #eff6ff; }
+    .pill.green { color: #047857; background: #ecfdf5; }
+    .pill.amber { color: #a16207; background: #fef3c7; }
+    .pill.red { color: #b91c1c; background: #fef2f2; }
+    .pill.slate { color: #475569; background: #f1f5f9; }
+    .pill.purple { color: #6d28d9; background: #f5f3ff; }
+    .queue { display: grid; gap: 10px; }
+    .queue-item { padding: 12px; border: 1px solid var(--line); border-radius: 10px; }
+    .queue-item strong { display: block; font-size: 13px; }
+    .queue-item p { margin: 5px 0 10px; color: var(--muted); font-size: 12px; line-height: 1.45; }
+    .queue-footer { display: flex; align-items: center; justify-content: space-between; }
+    .link { border: 0; background: none; color: var(--primary); padding: 0; font-weight: 700; font-size: 12px; }
+    .section-gap { margin-top: 18px; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 16px; }
+    .search { min-width: 240px; height: 38px; flex: 1; max-width: 440px; border: 1px solid var(--line); border-radius: 9px; padding: 0 12px; background: white; color: var(--ink); }
+    .select { height: 38px; border: 1px solid var(--line); border-radius: 9px; color: #475569; background: white; padding: 0 10px; }
+    .table-wrap { overflow: auto; border: 1px solid var(--line); background: white; border-radius: var(--radius); box-shadow: var(--shadow); }
+    table { width: 100%; border-collapse: collapse; min-width: 820px; }
+    th { text-align: left; color: #64748b; background: #f8fafc; font-size: 11px; font-weight: 800; letter-spacing: .02em; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+    td { padding: 14px; border-bottom: 1px solid #eef2f7; font-size: 12px; vertical-align: middle; }
+    tr:last-child td { border-bottom: 0; }
+    tbody tr:hover { background: #fbfdff; }
+    .company { font-weight: 750; color: #1e293b; }
+    .muted { color: var(--muted); }
+    .split { display: grid; grid-template-columns: 210px minmax(0, 1fr) 300px; gap: 16px; }
+    .side-list { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+    .side-list h3 { padding: 15px; border-bottom: 1px solid var(--line); }
+    .side-list button { width: 100%; text-align: left; padding: 11px 14px; border: 0; background: white; color: #475569; font-size: 12px; border-bottom: 1px solid #eef2f7; }
+    .side-list button.active { color: #1d4ed8; background: #eff6ff; font-weight: 800; border-left: 3px solid var(--primary); padding-left: 11px; }
+    .dossier { min-width: 0; }
+    .dossier-banner { background: linear-gradient(100deg, #eff6ff, #fff); border: 1px solid #bfdbfe; border-radius: var(--radius); padding: 18px; margin-bottom: 14px; }
+    .dossier-banner-top { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; }
+    .dossier-title { font-size: 20px; font-weight: 800; margin: 0; }
+    .facts { display: grid; gap: 10px; }
+    .fact { border: 1px solid var(--line); border-radius: 10px; padding: 13px; background: var(--surface); }
+    .fact-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .fact h3 { margin-top: 8px; line-height: 1.4; }
+    .fact p { color: #475569; line-height: 1.55; margin: 7px 0 0; font-size: 12px; }
+    .fact-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; color: #64748b; font-size: 11px; }
+    .right-panel { display: grid; gap: 14px; align-content: start; }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 16px; }
+    .info-grid div span { display: block; color: var(--muted); font-size: 10px; margin-bottom: 4px; text-transform: uppercase; letter-spacing: .05em; }
+    .info-grid div strong { font-size: 12px; }
+    .review-card { padding: 15px; }
+    .review-card p { margin: 7px 0 14px; font-size: 12px; line-height: 1.5; color: var(--muted); }
+    .stack { display: grid; gap: 8px; }
+    .report { max-width: 920px; margin: 0 auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 34px 42px; box-shadow: var(--shadow); }
+    .report-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+    .report h2 { margin: 28px 0 10px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+    .report p { color: #475569; line-height: 1.7; font-size: 13px; }
+    .report ul { color: #475569; padding-left: 19px; line-height: 1.75; font-size: 13px; }
+    .report ol { color: #475569; padding-left: 20px; line-height: 1.8; font-size: 13px; }
+    .report-summary { background: #f1f5f9; border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; margin: 14px 0 4px; font-size: 14px; line-height: 1.7; color: #0f172a; }
+    .dims { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0; }
+    .dim { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+    .dim span:first-child { display: block; font-size: 12px; color: #64748b; }
+    .dim-score { font-weight: 700; color: var(--primary); font-size: 16px; }
+    .dim small { display: block; color: #475569; margin-top: 4px; line-height: 1.5; font-size: 12px; }
+    .profile-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+    .profile-table th { text-align: left; width: 140px; color: #64748b; font-weight: 600; padding: 7px 10px; border-bottom: 1px solid #eef2f7; vertical-align: top; }
+    .profile-table td { padding: 7px 10px; border-bottom: 1px solid #eef2f7; color: #0f172a; }
+    .report table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .report table th { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); color: #64748b; }
+    .report table td { padding: 7px 10px; border-bottom: 1px solid #eef2f7; }
+    .notice { display: flex; gap: 10px; padding: 12px; border: 1px solid #fde68a; border-radius: 10px; background: var(--warning-soft); color: #92400e; font-size: 12px; line-height: 1.5; }
+    .source-list { display: grid; gap: 8px; }
+    .source-row { display: grid; grid-template-columns: 1.5fr .7fr .8fr .7fr auto; gap: 10px; align-items: center; padding: 13px 14px; border-bottom: 1px solid #eef2f7; }
+    .source-row:last-child { border-bottom: 0; }
+    .modal-backdrop { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; padding: 20px; background: rgba(15, 23, 42, .46); backdrop-filter: blur(3px); z-index: 30; }
+    .modal-backdrop.open { display: flex; }
+    .modal { width: min(560px, 100%); background: white; border-radius: 14px; box-shadow: 0 22px 58px rgba(15,23,42,.25); overflow: hidden; }
+    .modal-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; border-bottom: 1px solid var(--line); }
+    .modal-body { padding: 20px; display: grid; gap: 13px; }
+    .field label { display: block; font-size: 12px; font-weight: 750; color: #334155; margin-bottom: 6px; }
+    .field input, .field select { width: 100%; height: 39px; border: 1px solid var(--line); border-radius: 8px; padding: 0 10px; }
+    .modal-foot { padding: 14px 20px; border-top: 1px solid var(--line); display: flex; justify-content: flex-end; gap: 9px; }
+    .mobile-menu { display: none; }
+    .toast { position: fixed; right: 22px; bottom: 22px; z-index: 60; max-width: min(360px, calc(100vw - 32px)); padding: 12px 14px; border: 1px solid #bfdbfe; border-radius: 10px; background: #eff6ff; color: #1e3a8a; box-shadow: 0 10px 28px rgba(15,23,42,.14); font-size: 12px; line-height: 1.45; opacity: 0; transform: translateY(8px); pointer-events: none; transition: opacity .18s ease, transform .18s ease; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .state-box { padding: 28px 18px; text-align: center; color: var(--muted); }
+    .state-box strong { display: block; color: var(--ink); margin-bottom: 5px; }
+    .loading-bar { height: 3px; background: linear-gradient(90deg, #bfdbfe 25%, #2563eb 50%, #bfdbfe 75%); background-size: 200% 100%; animation: loading 1.2s linear infinite; }
+    @keyframes loading { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+    .hidden { display: none !important; }
+    @media (max-width: 1100px) { .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } .split { grid-template-columns: 180px minmax(0, 1fr); } .right-panel { grid-column: 1 / -1; grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 780px) { .sidebar { display: none; } .sidebar.mobile-open { display: flex; position: fixed; inset: 0 auto 0 0; width: min(280px, 86vw); height: 100dvh; z-index: 40; box-shadow: 18px 0 42px rgba(15, 23, 42, .18); } .topbar { padding: 0 16px; } .content { padding: 22px 16px 40px; } .mobile-menu { display: inline-flex; } .page-head { flex-direction: column; } .metrics { grid-template-columns: 1fr 1fr; gap: 10px; } .metric { min-height: 112px; padding: 14px; } .layout, .split { display: block; } .layout > *, .split > * { margin-bottom: 14px; } .side-list { display: flex; overflow-x: auto; } .side-list h3 { display: none; } .side-list button { min-width: max-content; border-bottom: 0; border-right: 1px solid #eef2f7; } .right-panel { display: grid; grid-template-columns: 1fr; } .top-actions .button.secondary { display: none; } .report { padding: 24px 20px; } .task-row { grid-template-columns: 1fr auto; } .task-row > :nth-child(2), .task-row > :nth-child(3) { display: none; } }
+    /* 数据库更新状态条 */
+    .db-status { display: flex; flex-wrap: wrap; gap: 14px 18px; align-items: center; justify-content: space-between; margin-bottom: 16px; padding: 14px 16px; background: var(--surface-soft); border: 1px solid var(--line); border-radius: var(--radius); }
+    .db-status-meta { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: baseline; font-size: 13px; color: var(--muted); }
+    .db-status-label { color: var(--muted); }
+    .db-status-value { color: var(--ink); font-weight: 600; }
+    .db-status-sep { color: var(--line); }
+    .db-changelog { margin: -6px 0 16px; padding: 12px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); font-size: 12.5px; color: var(--muted); }
+    .db-changelog strong { color: var(--ink); display: block; margin-bottom: 6px; }
+    .db-change { padding: 3px 0; color: var(--ink); }
+    .db-change .muted { margin-left: 6px; font-size: 11.5px; }
+    .button.secondary:disabled { opacity: .6; cursor: default; }
+    .cv-box { border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; background: #f8fafc; margin: 6px 0 4px; }
+    .cv-top { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+    .cv-providers { color: var(--ink-2); font-size: 13px; }
+    .cv-meta { display: flex; gap: 10px; flex-wrap: wrap; }
+    .cv-meta > div { flex: 1 1 90px; background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; text-align: center; }
+    .cv-num { display: block; font-size: 20px; font-weight: 700; color: var(--ink); }
+    .cv-meta label { display: block; margin-top: 4px; font-size: 11.5px; color: var(--ink-2); }
+    .cv-sub { margin: 14px 0 4px; color: #475569; font-size: 13.5px; }
+    .cv-list { margin: 0; padding-left: 18px; color: var(--ink); }
+    .cv-list li { margin: 4px 0; font-size: 13px; }
+    .check-grid { display: flex; flex-wrap: wrap; gap: 10px 18px; }
+    .check-grid label { display: inline-flex; align-items: center; gap: 6px; font-weight: 500; font-size: 13px; color: var(--ink); cursor: pointer; }
+    .check-grid input { width: auto; margin: 0; }
+    .discover-split { grid-template-columns: minmax(280px, 360px) minmax(0, 1.7fr); align-items: start; }
+    #discover-list .queue-item { cursor: pointer; }
+    #discover-list .queue-item:hover { box-shadow: 0 0 0 1px #93c5fd inset; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" id="primary-navigation" aria-label="主导航">
+      <div class="brand"><div class="brand-mark">V</div><div><strong>Vigor 工作台</strong><small>客户背调与销售研究</small></div></div>
+      <div class="nav-label">研究</div>
+      <nav class="nav">
+        <button class="active" data-page="dashboard"><span class="nav-icon">⌂</span>工作台</button>
+        <button data-page="discover"><span class="nav-icon">⌕</span>客户背调</button>
+        <button data-page="companies"><span class="nav-icon">▦</span>数据库</button>
+        <button data-page="prospects"><span class="nav-icon">☆</span>主动开发名单</button>
+        <button data-page="tasks"><span class="nav-icon">◷</span>研究任务</button>
+        <button data-page="dossier"><span class="nav-icon">▤</span>客户档案</button>
+        <button data-page="reports"><span class="nav-icon">▧</span>报告</button>
+      </nav>
+      <div class="nav-label">治理</div>
+      <nav class="nav">
+        <button data-page="sources"><span class="nav-icon">◫</span>来源策略</button>
+        <button data-page="exports"><span class="nav-icon">⇩</span>导出记录</button>
+      </nav>
+      <div class="nav-spacer"></div>
+      <div class="user-box"><div class="avatar">MC</div><div><strong>Monk Chen</strong><small>销售负责人</small></div></div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar"><div><button class="icon-button mobile-menu" aria-label="打开导航" aria-expanded="false" aria-controls="primary-navigation">☰</button><span class="crumb">Vigor 工作台 / <strong id="crumb">工作台</strong></span></div><div class="top-actions"><button class="button secondary" data-go="exports">导出记录</button><button class="button primary" data-open="research-modal">+ 新建研究</button></div></header>
+      <div class="content">
+        <section class="page active" id="dashboard">
+          <div class="page-head"><div><h1>研究工作台</h1><p class="lede">查看待处理的客户研究、人工复核与报告审核。所有数据为原型示例，不代表真实客户事实。</p></div><button class="button primary" data-open="research-modal">+ 新建研究</button></div>
+          <div class="metrics">
+            <article class="metric"><div class="metric-top"><span class="metric-icon blue">▦</span><span class="pill blue">五国</span></div><div class="metric-value">286</div><span class="metric-label">企业数据库</span></article>
+            <article class="metric"><div class="metric-top"><span class="metric-icon amber">☆</span><span class="pill amber">需推进</span></div><div class="metric-value">24</div><span class="metric-label">主动开发名单</span></article>
+            <article class="metric"><div class="metric-top"><span class="metric-icon red">!</span><span class="pill red">本周 +6</span></div><div class="metric-value">9</div><span class="metric-label">近期机会信号</span></article>
+            <article class="metric"><div class="metric-top"><span class="metric-icon blue">◷</span><span class="pill blue">待处理</span></div><div class="metric-value">12</div><span class="metric-label">待研究任务</span></article>
+          </div>
+          <div class="layout">
+            <section class="panel"><div class="panel-head"><div><h2>优先处理对象</h2><small>结合主动开发优先级与背调状态排序</small></div><button class="link" data-go="prospects">查看开发名单</button></div><div class="panel-body" id="priority-tasks"></div></section>
+            <aside class="panel"><div class="panel-head"><div><h2>审核队列</h2><small>需要销售负责人确认</small></div></div><div class="panel-body queue">
+              <div class="queue-item"><strong>主体规模待复核</strong><p>Atlantic Drilling Services 员工规模来自公开网页，尚无法确认是否满足 100+ 门槛。</p><div class="queue-footer"><span class="pill amber">人工复核</span><button class="link" data-dossier="Atlantic Drilling Services">查看档案</button></div></div>
+              <div class="queue-item"><strong>报告等待签发</strong><p>Deep Industries 深研报告已完成证据审阅，等待确认行动建议。</p><div class="queue-footer"><span class="pill blue">待审核</span><button class="link" data-go="reports">审核报告</button></div></div>
+              <div class="queue-item"><strong>来源策略待确认</strong><p>Brazil ANP 公告页需要确认快照和 PDF 导出范围。</p><div class="queue-footer"><span class="pill slate">来源治理</span><button class="link" data-go="sources">查看策略</button></div></div>
+            </div></aside>
+          </div>
+        </section>
+
+        <section class="page" id="discover">
+          <div class="page-head"><div><h1>客户背调</h1><p class="lede">创建并查看客户背调研究。完成的研究按事实 / 推断 / 未知分层呈现，并保留来源与多模型交叉验证结果。</p></div><button class="button primary" data-open="research-modal">+ 单公司研究</button></div>
+          <div class="panel"><div class="panel-head"><div><h2>发现入口</h2><small>选择一种方式建立候选研究对象</small></div></div><div class="panel-body">
+            <div class="toolbar"><button class="button primary tab-button" data-tab="company">单公司</button><button class="button secondary tab-button" data-tab="import">CSV / Excel 导入</button><button class="button secondary tab-button" data-tab="filter">条件搜索</button></div>
+            <div id="discovery-content"></div>
+          </div></div>
+          <div class="split discover-split">
+            <section class="panel"><div class="panel-head"><div><h2>背调研究列表</h2><small>点击查看对应报告</small></div><button class="link" data-go="reports">报告审核</button></div><div class="panel-body" id="discover-list"></div></section>
+            <section class="panel"><div class="panel-head"><div><h2>背调报告</h2><small>事实 / 推断 / 未知 分层</small></div></div><article class="report" id="discover-report"><div class="report-meta" id="discover-report-meta"></div><div id="discover-report-body"></div></article></section>
+          </div>
+        </section>
+
+        <section class="page" id="companies">
+          <div class="page-head"><div><h1>数据库</h1><p class="lede">按国家、行业、规模和机会信号筛选企业，找到值得主动开发的目标客户。该数据库按既定准入规则定时更新。</p></div><button class="button primary" data-go="discover">发现新企业</button></div>
+          <div class="db-status" id="db-status">
+            <div class="db-status-meta">
+              <span class="db-status-label">上次更新</span><span id="db-last-update" class="db-status-value">—</span>
+              <span class="db-status-sep">·</span>
+              <span class="db-status-label">下次定时更新</span><span id="db-next-update" class="db-status-value">—</span>
+              <span class="db-status-sep">·</span>
+              <span class="db-status-label">更新规则</span><span id="db-rule" class="db-status-value">五国 · 五行业 · 100+ · TTL 30天</span>
+            </div>
+            <button class="button secondary" id="db-refresh">立即更新</button>
+            <button class="button secondary" id="db-config-btn">目标配置</button>
+          </div>
+          <div class="db-changelog hidden" id="db-changelog"></div>
+          <div class="toolbar"><select class="select" aria-label="按国家筛选"><option>全部国家</option><option>Norway</option><option>United Kingdom</option><option>Nigeria</option><option>Angola</option><option>Brazil</option></select><select class="select" aria-label="按行业筛选"><option>全部行业</option><option>Oilfield service</option><option>Drilling</option><option>Manufacturer</option><option>Project contractor</option></select><select class="select" aria-label="按企业规模筛选"><option>全部规模</option><option>规模 100+</option><option>规模未知</option></select><select class="select" aria-label="按资料状态筛选"><option>全部资料状态</option><option>已验证</option><option>需要更新</option><option>尚未研究</option></select><input class="search" aria-label="搜索数据库" placeholder="搜索公司、官网或关键词" /></div>
+          <div class="table-wrap"><div class="loading-bar hidden" id="company-loading" aria-label="正在读取企业资料"></div><table><thead><tr><th>企业</th><th>国家</th><th>行业</th><th>规模</th><th>机会信号</th><th>资料状态</th><th>开发状态</th><th></th></tr></thead><tbody id="company-table"></tbody></table></div><div class="state-box hidden" id="company-empty" role="status"><strong>没有匹配的企业</strong><span>调整国家、行业或规模筛选条件后重试。</span></div><div class="state-box hidden" id="company-error" role="alert"><strong>企业资料暂时无法读取</strong><span>原型环境未连接真实数据源，请稍后重试。</span><div style="margin-top:12px"><button class="button secondary" id="retry-companies">重试读取</button></div></div>
+        </section>
+
+        <section class="page" id="prospects">
+          <div class="page-head"><div><h1>主动开发名单</h1><p class="lede">管理销售优先级、负责人和下一步行动。名单只服务内部销售，不自动触达客户。</p></div><button class="button primary" data-go="companies">从数据库添加</button></div>
+          <div class="toolbar"><select class="select" aria-label="按优先级筛选"><option>全部优先级</option><option>P1 · 立即推进</option><option>P2 · 近期培育</option><option>P3 · 持续观察</option></select><select class="select" aria-label="按开发阶段筛选"><option>全部阶段</option><option>待首次接触</option><option>已建立联系</option><option>等待机会</option></select><button class="button secondary" data-go="exports">导出开发名单</button></div>
+          <div class="table-wrap"><table><thead><tr><th>企业</th><th>国家 / 行业</th><th>优先级</th><th>负责人</th><th>开发阶段</th><th>下一步</th><th>更新时间</th><th>跟进</th><th></th></tr></thead><tbody id="prospect-table"></tbody></table></div><div class="state-box hidden" id="prospect-empty" role="status"><strong>主动开发名单为空</strong><span>从数据库选择企业加入名单。</span></div>
+        </section>
+
+        <section class="page" id="tasks">
+          <div class="page-head"><div><h1>研究任务</h1><p class="lede">初筛、深研和机会专项采用不同有效期。过期报告不可作为当前销售依据。</p></div><button class="button primary" data-open="research-modal">+ 新建研究</button></div>
+          <div class="toolbar"><input class="search" aria-label="搜索研究任务" placeholder="搜索公司、国家或任务编号" /><select class="select" aria-label="按状态筛选"><option>全部状态</option><option>待准入</option><option>人工复核</option><option>研究中</option><option>待审核</option><option>已发布</option><option>已过期</option></select><select class="select" aria-label="按任务类型筛选"><option>全部任务类型</option><option>初筛</option><option>深研</option><option>机会专项</option></select></div>
+          <div class="table-wrap"><table><thead><tr><th>企业 / 研究编号</th><th>国家</th><th>类型</th><th>状态</th><th>证据覆盖</th><th>有效期</th><th>负责人</th><th></th></tr></thead><tbody id="task-table"></tbody></table></div>
+        </section>
+
+        <section class="page" id="dossier">
+          <div class="page-head"><div><h1>客户档案</h1><p class="lede">所有示例内容均标识其证据状态。没有来源的信息不会作为企业事实呈现。</p></div><button class="button primary" id="dossier-update">发起更新研究</button></div>
+          <div class="split">
+            <aside class="side-list" aria-label="档案区块"><h3>档案区块</h3><button class="active" data-section="summary">研究摘要</button><button data-section="fact">已验证事实</button><button data-section="inference">AI 推断</button><button data-section="unknown">资料不足</button><button data-section="contacts">公开职业联系人</button><button data-section="history">报告历史</button></aside>
+            <section class="dossier">
+              <div class="dossier-banner"><div class="dossier-banner-top"><div><div class="report-meta" id="dossier-meta"><span class="pill blue">深研</span><span class="pill amber">待审核</span><span class="pill slate">示例数据</span></div><h2 class="dossier-title" id="dossier-title">Deep Industries</h2><p class="lede" id="dossier-lede">Norway · 官网：deep-industries.example · 目标类别：Well Intervention Tools</p></div><span class="pill amber" id="dossier-validity">90 天有效期</span></div></div>
+              <div class="toolbar" id="dossier-toolbar"><button class="button secondary fact-filter" data-filter="all">全部</button><button class="button secondary fact-filter" data-filter="fact">已验证事实</button><button class="button secondary fact-filter" data-filter="inference">AI 推断</button><button class="button secondary fact-filter" data-filter="unknown">资料不足</button></div>
+              <div class="facts" id="facts"></div>
+            </section>
+            <aside class="right-panel">
+              <section class="panel"><div class="panel-head"><h2>研究状态</h2></div><div class="info-grid"><div><span>当前状态</span><strong>待报告审核</strong></div><div><span>研究编号</span><strong>RES-2026-0148</strong></div><div><span>负责人</span><strong>Monk Chen</strong></div><div><span>截至日期</span><strong>2026-11-11</strong></div></div></section>
+              <section class="panel"><div class="panel-head"><h2>开发状态</h2><small>与主动开发名单、跟进记录实时联动</small></div><div id="dossier-dev-status"></div></section>
+              <section class="panel review-card"><span class="pill amber">需要操作</span><h2 style="margin-top:10px">审核并签发报告</h2><p>确认高影响事实、公开职业联系人与行动建议后，才可发布内部报告和允许导出。</p><div class="stack"><button class="button primary" data-go="reports">进入报告审核</button><button class="button secondary" id="request-evidence">要求补充证据</button></div></section>
+              <section class="panel review-card"><span class="pill slate">MVP 边界</span><h2 style="margin-top:10px">后续能力未启用</h2><p>决策链、完整竞争格局和深度产品匹配将在基础研究闭环通过验收后再启用。</p></section>
+            </aside>
+          </div>
+        </section>
+
+        <section class="page" id="reports">
+          <div class="page-head"><div><h1>报告审核</h1><p class="lede">已发布报告的任何修改都会创建新版本，并需要重新审核。以下为原型示例内容。</p></div><div style="display:flex;gap:8px"><button class="button secondary" data-go="exports">导出记录</button><button class="button primary" id="approve-report">审核通过并发布</button></div></div>
+          <div class="toolbar" style="margin:14px 0 6px"><span class="task-sub">原型示例切换：</span><button class="button secondary" id="switch-diligence">客户背调（due_diligence）</button><button class="button secondary" id="switch-analysis">主动开发（company_analysis）</button></div>
+          <article class="report"><div class="report-meta"><span class="pill blue">版本 0.3</span><span class="pill amber" id="report-status">待销售负责人审核</span><span class="pill slate">Internal · Configurable</span><span class="pill slate" id="report-date">截至 2026-08-13</span></div><div id="report-body"></div></article>
+        </section>
+
+        <section class="page" id="sources">
+          <div class="page-head"><div><h1>来源策略</h1><p class="lede">来源策略控制抓取、摘录、快照、导出和留存。未明确允许的来源默认不抓取、不持久化、不导出。</p></div><button class="button primary" id="add-source">+ 新增来源</button></div>
+          <section class="panel"><div class="panel-head"><div><h2>已配置来源</h2><small>原型仅使用官方或明确允许的公开来源</small></div></div><div class="source-list" id="source-list"></div></section>
+        </section>
+
+        <section class="page" id="exports">
+          <div class="page-head"><div><h1>导出记录</h1><p class="lede">CSV / Excel 由后端实时生成并审计（导出时间 / 报告 / 行数 / 字节）。PDF 由浏览器原生打印（CJK 安全），打印动作同样记录审计。</p></div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <select id="export-run-select" class="select" aria-label="选择要导出的报告"><option value="">选择已完成报告…</option></select>
+              <button class="button primary" id="export-csv">下载 CSV</button>
+              <button class="button secondary" id="export-xlsx">下载 Excel</button>
+              <button class="button secondary" id="export-pdf">导出 PDF（打印）</button>
+              <span id="export-loading" class="muted hidden">加载中…</span>
+            </div>
+          </div>
+          <div class="table-wrap"><table><thead><tr><th>报告</th><th>格式</th><th>导出时间</th><th>行数</th><th>字节</th><th>状态</th></tr></thead><tbody id="export-table"></tbody></table></div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <div class="modal-backdrop" id="research-modal" role="dialog" aria-modal="true" aria-labelledby="research-modal-title">
+    <div class="modal"><div class="modal-head"><div><h2 id="research-modal-title">新建单公司研究</h2><p class="lede">所有必填信息用于实体识别、来源研究与任务路由。</p></div><button class="icon-button" data-close="research-modal" aria-label="关闭新建研究窗口">×</button></div>
+      <form id="research-form"><div class="modal-body"><div class="field"><label for="company-name">公司名称 *</label><input id="company-name" required placeholder="例如：Deep Industries" /></div><div class="field"><label for="country">国家/地区 *</label><select id="country" required><option value="">请选择</option><option>Norway</option><option>United Kingdom</option><option>Nigeria</option><option>Angola</option><option>Brazil</option></select></div><div class="field"><label for="domain">官网或域名 *</label><input id="domain" required placeholder="company.example" /></div><div class="field"><label for="product">目标产品/类别 *</label><input id="product" required placeholder="例如：Well Intervention Tools" /></div><div class="field"><label for="research-type">研究类型 *</label><select id="research-type" required><option>初筛（30 天）</option><option>深研（90 天）</option><option>机会专项（30 天）</option></select></div></div><div class="modal-foot"><button class="button secondary" type="button" data-close="research-modal">取消</button><button class="button primary" type="submit">创建研究任务</button></div></form>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="followup-modal" role="dialog" aria-modal="true" aria-labelledby="followup-modal-title">
+    <div class="modal"><div class="modal-head"><div><h2 id="followup-modal-title">跟进记录</h2><p class="lede">新增跟进后，开发阶段按最近一条记录自动判断（可手动覆盖）。</p></div><button class="icon-button" data-close="followup-modal" aria-label="关闭跟进窗口">×</button></div>
+      <div class="modal-body">
+        <div class="followup-stage"><span class="label">当前开发阶段</span><span id="followup-stage" class="pill"></span><button class="link" id="followup-override-btn" style="margin-left:8px">手动设置</button></div>
+        <div class="followup-history" id="followup-history"></div>
+        <div class="field"><label for="followup-type">跟进类型</label><select id="followup-type"><option>电话</option><option>邮件</option><option>会议</option><option>现场拜访</option><option>方案</option><option>报价</option><option>样品</option><option>失联</option><option>其他</option></select></div>
+        <div class="field"><label for="followup-note">内容</label><textarea id="followup-note" rows="3" placeholder="例如：完成技术方案交流，对方要求报价"></textarea></div>
+        <div class="field"><label for="followup-by">跟进人</label><input id="followup-by" value="Monk Chen" /></div>
+      </div>
+      <div class="modal-foot"><button class="button secondary" type="button" data-close="followup-modal">取消</button><button class="button primary" id="followup-add">保存跟进</button></div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="db-config-modal" role="dialog" aria-modal="true" aria-labelledby="db-config-title">
+    <div class="modal"><div class="modal-head"><div><h2 id="db-config-title">数据库目标配置</h2><p class="lede">设定数据库要覆盖的区域、国家、客户类型、目标数量与自动更新频率；保存后立即按新规则刷新并重新调度。</p></div><button class="icon-button" data-close="db-config-modal" aria-label="关闭目标配置">×</button></div>
+      <div class="modal-body">
+        <div class="field"><label for="cfg-region">目标区域</label><select id="cfg-region"><option value="global">全球（五国）</option><option value="europe">欧洲（挪威 / 英国）</option><option value="africa">非洲（尼日利亚 / 安哥拉）</option><option value="south_america">南美（巴西）</option><option value="asia_pacific">亚太</option><option value="custom">自定义（手动勾选国家）</option></select></div>
+        <div class="field"><label>目标国家<span class="muted">（选择区域自动预置，也可手动勾选）</span></label><div class="check-grid" id="cfg-countries"></div></div>
+        <div class="field"><label>目标客户类型<span class="muted">（可多选）</span></label><div class="check-grid" id="cfg-types"></div></div>
+        <div class="field"><label for="cfg-count">目标数量（纳入企业上限）</label><input id="cfg-count" type="number" min="1" max="500" value="50" /></div>
+        <div class="field"><label for="cfg-frequency">自动更新频率</label><select id="cfg-frequency"><option value="daily">每日</option><option value="weekly">每周</option><option value="monthly">每 30 天</option><option value="manual">手动</option></select></div>
+      </div>
+      <div class="modal-foot"><button class="button secondary" type="button" data-close="db-config-modal">取消</button><button class="button primary" id="db-config-save">保存配置</button></div>
+    </div>
+  </div>
+
+  <script>
+    const pages = { dashboard: '工作台', discover: '客户背调', companies: '数据库', prospects: '主动开发名单', tasks: '研究任务', dossier: '客户档案', reports: '报告审核', sources: '来源策略', exports: '导出记录' };
+    const companies = [
+      { company: 'Deep Industries', country: 'Norway', industry: 'Oilfield service', size: '100–250', signal: '项目扩张', signalTone: 'red', profile: '已验证', profileTone: 'green', prospect: '已加入', prospectTone: 'amber' },
+      { company: 'Atlantic Drilling Services', country: 'United Kingdom', industry: 'Drilling', size: '规模未知', signal: '待确认', signalTone: 'amber', profile: '待复核', profileTone: 'amber', prospect: '未加入', prospectTone: 'slate' },
+      { company: 'Angola Offshore Projects', country: 'Angola', industry: 'Project contractor', size: '250–500', signal: '招标线索', signalTone: 'red', profile: '研究中', profileTone: 'blue', prospect: '已加入', prospectTone: 'amber' },
+      { company: 'Nordic Field Manufacturing', country: 'Norway', industry: 'Manufacturer', size: '100–250', signal: '招聘增长', signalTone: 'red', profile: '已验证', profileTone: 'green', prospect: '未加入', prospectTone: 'slate' },
+      { company: 'Brazil Well Systems', country: 'Brazil', industry: 'Oilfield service', size: '100–250', signal: '暂无信号', signalTone: 'slate', profile: '需要更新', profileTone: 'amber', prospect: '已加入', prospectTone: 'amber' }
+    ];
+    const prospects = [
+      { company: 'Deep Industries', country: 'Norway', industry: 'Oilfield service', priority: 'P1 · 立即推进', priorityTone: 'red', owner: 'Monk Chen', stage: '待首次接触', next: '确认供应商准入入口', updated: '今天 09:42',
+        followUps: [
+          { date: '2026-08-12', type: '电话', note: '首次电话沟通，对方采购对井下工具表示兴趣', by: 'Monk Chen' },
+          { date: '2026-08-14', type: '邮件', note: '已发送产品目录与 ISO/API 资质摘要', by: 'Monk Chen' }
+        ] },
+      { company: 'Angola Offshore Projects', country: 'Angola', industry: 'Project contractor', priority: 'P1 · 立即推进', priorityTone: 'red', owner: 'Monk Chen', stage: '等待机会', next: '跟进招标公告来源', updated: '昨天 16:10',
+        followUps: [ { date: '2026-08-10', type: '其他', note: '监测到其招标公告，待机会窗口', by: 'Research Queue' } ],
+        stageOverride: '等待机会' },
+      { company: 'Brazil Well Systems', country: 'Brazil', industry: 'Oilfield service', priority: 'P2 · 近期培育', priorityTone: 'amber', owner: 'Research Queue', stage: '已建立联系', next: '更新最新项目资料', updated: '2026-08-08',
+        followUps: [
+          { date: '2026-07-20', type: '会议', note: '完成技术方案交流', by: 'Monk Chen' },
+          { date: '2026-08-05', type: '报价', note: '已发送初步报价单', by: 'Monk Chen' }
+        ] }
+    ];
+
+    // —— 开发阶段推导：根据最近一条跟进记录自动判断（可被 stageOverride 手动覆盖）——
+    const STAGE_TONE = { '待首次接触':'blue', '已建立联系':'blue', '方案沟通':'amber', '商务谈判':'amber', '已成交':'green', '已失联':'red', '等待机会':'amber' };
+    const FOLLOWUP_STAGE_MAP = { '电话':'已建立联系', '邮件':'已建立联系', '其他':'已建立联系', '会议':'方案沟通', '现场拜访':'方案沟通', '方案':'方案沟通', '样品':'方案沟通', '报价':'商务谈判', '合同':'商务谈判', '商务':'商务谈判', '失联':'已失联' };
+    function deriveStage(followUps) {
+      if (!followUps || !followUps.length) return '待首次接触';
+      const last = followUps[followUps.length - 1];
+      return FOLLOWUP_STAGE_MAP[last.type] || '已建立联系';
+    }
+    function currentStage(p) { return p.stageOverride || deriveStage(p.followUps); }
+    function findProspect(company) { return prospects.find(p => p.company === company); }
+    let currentDossierCompany = 'Deep Industries';
+    let currentDossierSection = 'summary';
+    const tasks = [
+      { company: 'Deep Industries', id: 'RES-2026-0148', country: 'Norway', type: '深研', status: '待审核', evidence: '8 / 10', expiry: '2026-11-11', owner: 'Monk Chen', tone: 'amber' },
+      { company: 'Atlantic Drilling Services', id: 'RES-2026-0152', country: 'United Kingdom', type: '初筛', status: '人工复核', evidence: '3 / 7', expiry: '2026-09-12', owner: 'Monk Chen', tone: 'amber' },
+      { company: 'Angola Offshore Projects', id: 'RES-2026-0141', country: 'Angola', type: '机会专项', status: '研究中', evidence: '5 / 9', expiry: '2026-09-10', owner: 'Research Queue', tone: 'blue' },
+      { company: 'Nordic Field Manufacturing', id: 'RES-2026-0132', country: 'Norway', type: '初筛', status: '已发布', evidence: '7 / 7', expiry: '2026-09-02', owner: 'Monk Chen', tone: 'green' },
+      { company: 'Brazil Well Systems', id: 'RES-2026-0128', country: 'Brazil', type: '深研', status: '已过期', evidence: '6 / 10', expiry: '2026-08-01', owner: 'Research Queue', tone: 'red' }
+    ];
+    const facts = [
+      { type: 'fact', label: '已验证事实', title: 'Entity and official website context', text: 'The entity name and website context are shown as prototype evidence items. Publication requires the reviewer to confirm the approved source record.', source: 'Approved public source · English', time: 'Retrieved 2026-08-12', tone: 'green' },
+      { type: 'fact', label: '已验证事实', title: 'Norwegian-language evidence retained with translation', text: 'A source excerpt is preserved in its original language with a separately labeled English summary. The translated summary does not replace the source record.', source: 'Official source · Norwegian + English summary', time: 'Retrieved 2026-08-12', tone: 'green' },
+      { type: 'inference', label: 'AI 推断 / 待核验', title: 'Potential relevance to the selected product category', text: 'This is an example inference based on the selected product category and public operating context. It must not be presented as a confirmed customer requirement.', source: 'Inference basis: evidence items E-008, E-011', time: 'Model output pending review', tone: 'purple' },
+      { type: 'unknown', label: '资料不足', title: 'Supplier registration status is not yet confirmed', text: 'No approved source has confirmed the active supplier entry point. The report must state this as unknown until evidence is collected.', source: 'Evidence gap', time: 'Action: request additional source review', tone: 'slate' },
+      { type: 'fact', label: '公开职业联系人', title: 'Public professional contact entry', text: 'Only an example role-related contact entry is shown. Production records must include source, verification date, permitted fields, and report lifecycle status.', source: 'Company public contact page · Example only', time: 'Last verified: pending', tone: 'blue' }
+    ];
+    // 客户档案 → 公开职业联系人（示例）
+    const dossierContacts = [
+      { name: 'Ingrid Solberg', title: 'Procurement Manager, Subsea', email: 'i.solberg@example-no.com', decision: true },
+      { name: 'Henrik Larsen', title: 'Operations Director', email: 'h.larsen@example-no.com', decision: false },
+      { name: 'Public IR Desk', title: 'Investor & Public Relations', email: 'ir@deep-industries.example', decision: false }
+    ];
+    // 客户档案 → 报告历史（示例）
+    const reportHistory = [
+      { version: 'v0.3', status: '待销售负责人审核', date: '2026-08-13', author: 'AI Research', note: '新增公开职业联系人核验与机会专项' },
+      { version: 'v0.2', status: '已审核发布', date: '2026-07-20', author: 'Monk Chen', note: '初版深研，覆盖工商与财务' },
+      { version: 'v0.1', status: '草稿', date: '2026-07-02', author: 'AI Research', note: '创建研究任务 RES-2026-0148' }
+    ];
+    const sources = [
+      ['Norwegian Offshore Directorate', 'Norway', 'Official', 'Fact source', 'Approved'],
+      ['UK Energy Licensing Portal', 'United Kingdom', 'Official', 'Fact source', 'Approved'],
+      ['NUPRC Public Notices', 'Nigeria', 'Official', 'Fact source', 'Approved'],
+      ['Company IR / Newsroom', 'Five markets', 'Public first-party', 'Lead + evidence', 'Approved'],
+      ['Brazil ANP announcements', 'Brazil', 'Official', 'Policy review', 'Pending']
+    ];
+    // 结构化背调报告示例（原型数据，仅用于演示参考报告版式；非真实背调结论）
+    const sampleReport = {
+      reportDate: '2026-08-13',
+      perspective: 'CHINA VIGOR DRILLING 大客户开发视角',
+      engagementBackground: '销售主动开发候选 · 数据库筛选结果',
+      dataSources: ['公司官网', '公开搜索引擎', '行业数据库'],
+      oneLineSummary: '挪威中型井筒干预与完井工具服务商，区域渠道伙伴 + 直接客户双轨候选。',
+      matchScore: 7.5,
+      matchSummary: '产品需求匹配高，井下工具可作为其供应链补充；建议以渠道伙伴切入，同步争取直接项目试用。',
+      profile: {
+        fullName: 'Deep Industries AS',
+        brandName: 'Deep Industries',
+        founded: '2009 年',
+        hq: 'Norway',
+        ownership: '私营持股（未公开 UBO）',
+        management: 'CEO 直管采购，管理结构紧凑',
+        employeeSize: 180,
+        employeeSizeNote: '官网披露区间',
+        certifications: 'ISO 9001 / API Q1（待核实）',
+        website: 'https://deep-industries.example',
+        generalEmail: 'info@deep-industries.example',
+        technicalContact: 'cto@deep-industries.example'
+      },
+      matchDimensions: [
+        { key: 'product_fit', label: '产品需求匹配', score: 8, note: '井下工具与完井耗材需求明确' },
+        { key: 'industry_relevance', label: '行业相关性', score: 8, note: '油服主战场高度重叠' },
+        { key: 'decision_reach', label: '采购决策层可触达', score: 6, note: 'CEO 直管采购' },
+        { key: 'group_value', label: '集团战略价值', score: 5, note: '无集团协同' },
+        { key: 'willingness', label: '合作意愿强度', score: 6, note: '需具体项目窗口' }
+      ],
+      businessModel: '本地交付 + 现场技术服务，覆盖连续油管、修井与完井工具贸易。',
+      revenueStreams: ['井筒干预服务', '完井工具贸易', '现场技术支持'],
+      milestones: ['2009 年成立', '2015 年成立油服事业部', '2024 年进入北海项目'],
+      businessLines: ['连续油管', '修井', '完井工具'],
+      whiteSpaceGaps: [
+        { vigorProduct: '桥塞 / 封隔器 / SCSSV', fit: '高', note: '可嵌入其供应链作为国产优选供应商' },
+        { vigorProduct: '射孔枪 / 滑套', fit: '中高', note: '项目型试用切入' },
+        { vigorProduct: '陀螺 / MWD', fit: '中', note: '需评估高温适配' }
+      ],
+      recommendedPositioning: '渠道伙伴（Channel Partner）+ 直接客户（Direct Customer）双轨并行',
+      differentiation: '聚焦“中国井下工具一站式供应”，避开钻井总包红海',
+      keyPersonnel: [
+        { name: 'Jane Doe', title: 'Procurement Manager', email: 'purchase@deep-industries.example', phone: '+47 00000000', isDecisionMaker: true, source: 'company site' },
+        { name: 'Ola Nordmann', title: 'Technical Manager', email: 'cto@deep-industries.example', phone: '', isDecisionMaker: false, source: 'company site' }
+      ],
+      nextSteps: ['发送产品目录与资质摘要', '预约技术交流', '确认供应商准入入口与项目阶段'],
+      competitiveLandscape: '区域呈现“三足鼎立 + 国际真空”格局，本地交付能力是切入点。',
+      disclaimer: '本报告基于公开信息编制，仅供参考，不构成投资/交易建议。数据未经对方当事人核实，关键事实建议二次确认。'
+    };
+    // 主动开发原型样例（对齐 Deep_Industries 公司分析报告版式）
+    const sampleReportAnalysis = {
+      reportType: 'company_analysis',
+      reportDate: '2026-08-13',
+      perspective: 'CHINA VIGOR DRILLING 大客户开发视角',
+      engagementBackground: '主动开发候选 · 数据库筛选结果',
+      dataSources: ['公司官网', '投资者演示', '海关贸易数据', '第三方金融平台'],
+      oneLineSummary: '印度领先油气综合服务商，覆盖勘探后价值链 70%+，钻机利用率 100%，是完井工具与井下设备的优质潜在客户。',
+      matchScore: 8.2,
+      matchSummary: '业务覆盖天然气处理、钻井修井、连续油管与海上服务，与 VIGOR 井下工具/完井设备高度互补；客户黏性高但采购体系封闭，宜从子公司供应链与项目型试用切入。',
+      profile: {
+        fullName: 'Deep Industries Limited',
+        brandName: 'DIL',
+        formerNames: 'Deep CH4 Limited（2020-09 更名）',
+        founded: '1991 年',
+        hq: '印度古吉拉特邦艾哈迈达巴德',
+        ownership: '上市公司，国有油气巨头为主要客户',
+        management: '董事长兼总经理 Paras S. Savla；CFO Rohan V. Shah',
+        employeeSize: 1140,
+        employeeSizeNote: '年报披露',
+        certifications: 'BSE:543288 / NSE:DEEPINDS',
+        website: 'https://www.deepindustries.com',
+        generalEmail: null,
+        technicalContact: null
+      },
+      matchDimensions: [
+        { key: 'product_fit', label: '产品需求匹配', score: 9, note: '钻井修井/连续油管/完井耗材需求明确' },
+        { key: 'industry_relevance', label: '行业相关性', score: 9, note: '油服主战场高度重叠' },
+        { key: 'decision_reach', label: '采购决策层可触达', score: 5, note: '上市公司采购体系封闭' },
+        { key: 'group_value', label: '集团战略价值', score: 8, note: '印度龙头，标杆效应强' },
+        { key: 'willingness', label: '合作意愿强度', score: 6, note: '需通过供应链/项目窗口' }
+      ],
+      businessModel: '以租赁与包租（charter-hire）模式提供设备与服务，覆盖勘探后价值链 70%+ 的“一站式解决方案”。',
+      revenueStreams: ['天然气压缩/脱水', '产量提升合同(PEC)', '钻井与修井服务', '海上服务', '综合项目管理'],
+      milestones: ['1991 年成立', '2020 年更名 Deep Industries', '2025 年 Prabha 住宿驳船投产', '2026 年订单簿超 305 亿卢比'],
+      businessLines: ['天然气服务', '产量提升服务', '综合项目管理', '海上服务'],
+      whiteSpaceGaps: [
+        { vigorProduct: '桥塞 / 封隔器 / SCSSV', fit: '高', note: '可经 UAE 子公司供应链进入' },
+        { vigorProduct: '射孔枪 / 滑套', fit: '中高', note: '项目型试用切入' },
+        { vigorProduct: '连续油管 / OCTG', fit: '中', note: '与其连续油管服务协同' }
+      ],
+      recommendedPositioning: '经 UAE/迪拜子公司（SAAR International / Deep International DMCC）供应链切入 + 直接客户项目试用',
+      differentiation: '以“中国井下工具一站式高性价比供应”对接其供应链本地化需求',
+      keyPersonnel: [
+        { name: 'Paras S. Savla', title: 'Chairman & MD', email: '', phone: '', isDecisionMaker: true, source: 'company site' },
+        { name: 'Rohan V. Shah', title: 'CFO', email: '', phone: '', isDecisionMaker: false, source: 'company site' }
+      ],
+      nextSteps: ['通过 UAE 子公司确认供应商准入路径', '对接 ONGC Rajahmundry PEC 项目窗口', '准备产品目录与 API/ISO 资质摘要'],
+      competitiveLandscape: '印度油服由 ONGC/Oil India 等国企业主主导，设备与工具高度依赖进口，国产替代空间大。',
+      disclaimer: '本报告基于公开信息编制，包括公司官网、投资者演示文稿、新闻稿、海关贸易数据及第三方金融信息平台等来源，仅供参考，不构成投资建议。',
+      productsServices: [
+        { name: '天然气服务', detail: '天然气压缩、脱水、处理设施包租（charter-hire）。' },
+        { name: '产量提升服务(PEC)', detail: '与运营商签长期合同提升老油田产量，可延寿约 15 年。' },
+        { name: '综合项目管理', detail: '油气田全生命周期综合服务。' },
+        { name: '海上服务', detail: '住宿驳船(Prabha)、平台供应船(PSV)、锚作拖供船(AHTS)。' }
+      ],
+      customers: {
+        overview: '客户集中于印度国有油气巨头与大型能源企业，黏性高。',
+        contracts: [
+          { project: 'ONGC Rajahmundry 资产 PEC', customer: 'ONGC', amount: '约 140.2 亿卢比', term: '15 年', note: '公司史上最大合同' },
+          { project: '拉贾斯坦邦修井机部署', customer: 'Oil India Ltd', amount: '4.533 亿卢比', term: '3 年', note: '移动修井机包部署' },
+          { project: '阿萨姆邦/阿鲁纳恰尔邦修井机包租', customer: 'Oil India Ltd', amount: '9.672 亿卢比', term: '7 年', note: '修井机包租' },
+          { project: 'Prabha 住宿驳船运营', customer: '海上油气运营商', amount: '已产生收入', term: '持续', note: 'DP2 级海上服务' }
+        ]
+      },
+      suppliers: {
+        overview: '供应链全球化，通过 UAE/迪拜全资子公司负责国际采购与贸易。',
+        table: [
+          { name: 'PEM-TECH INC.', category: '压缩设备与技术', note: '天然气压缩相关设备' },
+          { name: '中国制造商', category: '油田钻探设备', note: '钻井滑套、方钻杆旋塞阀、钻杆吊卡等(HS 84314310)' },
+          { name: 'FlowChem', category: '离心泵及配件', note: '海水用离心泵及泵轴' },
+          { name: 'Fleetguard', category: '过滤器与滤芯', note: '船舶及设备用润滑油过滤器' }
+        ],
+        subsidiaries: [
+          { name: 'Deep International DMCC', relation: '全资子公司(迪拜)', detail: '国际商品采购与销售' },
+          { name: 'SAAR International FZ-LLC', relation: '全资子公司(UAE)', detail: '中东地区贸易' },
+          { name: 'Raas Equipment Pvt Ltd', relation: '全资子公司', detail: '设备采购与服务' },
+          { name: 'Dolphin Offshore Shipping Limited', relation: '间接子公司', detail: '海上航运资产' }
+        ]
+      },
+      financials: {
+        narrative: '订单簿超 305 亿卢比，钻机利用率 100%，FY27 收入增长指引约 25%。',
+        table: [
+          { metric: '营业收入', period1: '221.0 亿卢比(Q2 FY26)', period2: '420.5 亿卢比(H1 FY26)', growth: '+65.5%' },
+          { metric: 'EBITDA', period1: '112.9 亿卢比', period2: '207.9 亿卢比', growth: '+64.9%' },
+          { metric: '净利润(PAT)', period1: '71.2 亿卢比', period2: '132.9 亿卢比', growth: '+65.6%' }
+        ]
+      },
+      strategyOutlook: [
+        { theme: '海上服务扩张', detail: '收购 Dolphin Offshore Shipping，评估海豚级船舶收购。' },
+        { theme: '增值服务升级', detail: '传统 EPC 转为包租模式，提供整套天然气处理设施租赁。' },
+        { theme: '绿色氢能探索', detail: '已签署绿色氢能 MOU，预计 2-3 季度有实质进展。' },
+        { theme: '高规格钻机投资', detail: '评估更高规格钻井设备以缓解 100% 利用率瓶颈。' }
+      ]
+    };
+    function pill(text, tone='slate') { return `<span class="pill ${tone}">${text}</span>`; }
+    function escapeHtml(value) {
+      if (value == null) return '';
+      return String(value)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+    // 统一后端请求封装：网络层失败（后端未启动 / 跨域被拒）时抛出带清晰中文说明的错误，
+    // 由调用方统一 toast，避免每处重复且不一致的错误处理。
+    // 鉴权：iframe 与工作台同源，从 zustand persist(localStorage key='auth-storage') 读取 JWT，
+    // 注入 Authorization 头，复用工作台 authMiddleware（HS256 / 同一 JWT_SECRET）。
+    function getWorkbenchToken() {
+      try {
+        const raw = localStorage.getItem('auth-storage');
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        return parsed && parsed.state && parsed.state.token ? parsed.state.token : null;
+      } catch (e) { return null; }
+    }
+    async function apiFetch(url, opts = {}) {
+      const token = getWorkbenchToken();
+      const headers = Object.assign({}, opts.headers || {});
+      if (token && !headers['Authorization']) headers['Authorization'] = 'Bearer ' + token;
+      if (!headers['Content-Type'] && opts.method && opts.method !== 'GET') headers['Content-Type'] = 'application/json';
+      const merged = Object.assign({}, opts, { headers });
+      let res;
+      try {
+        res = await fetch(url, merged);
+      } catch (e) {
+        const err = new Error('后端服务不可达：请确认工作台后端已启动（同源 /api/customer-research）');
+        err.unreachable = true;
+        throw err;
+      }
+      if (res.status === 401) {
+        const err = new Error('登录已失效或未授权：请重新登录工作台后重试');
+        err.unauthorized = true;
+        throw err;
+      }
+      return res;
+    }
+    let toastTimer;
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 2800);
+    }
+    function go(page) {
+      document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+      document.getElementById(page).classList.add('active');
+      document.querySelectorAll('.nav button').forEach(el => el.classList.toggle('active', el.dataset.page === page));
+      document.getElementById('crumb').textContent = pages[page];
+      document.querySelector('.sidebar').classList.remove('mobile-open');
+      document.querySelector('.mobile-menu').setAttribute('aria-expanded', 'false');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      // 同步地址栏 hash，使刷新 / 深链可恢复当前页面（replaceState 不污染历史栈）
+      if (location.hash.slice(1) !== page) history.replaceState(null, '', '#' + page);
+      if (page === 'dossier') renderDossier(currentDossierCompany);
+    }
+    // 深链：刷新或带 #page 直接进入时恢复对应页面
+    window.addEventListener('hashchange', () => {
+      const p = location.hash.slice(1);
+      if (pages[p]) go(p);
+    });
+    function toggleMobileMenu() {
+      const sidebar = document.querySelector('.sidebar');
+      const button = document.querySelector('.mobile-menu');
+      const isOpen = sidebar.classList.toggle('mobile-open');
+      button.setAttribute('aria-expanded', String(isOpen));
+    }
+    function renderPriority() {
+      document.getElementById('priority-tasks').innerHTML = prospects.map((item) => `<div class="task-row"><div><span class="task-name">${item.company}</span><span class="task-sub">${item.country} · ${item.industry}</span></div><div>${pill(item.priority.split(' · ')[0], item.priorityTone)}</div><div>${pill(item.stageOverride ? `${currentStage(item)}（手动）` : currentStage(item), STAGE_TONE[currentStage(item)] || 'amber')}</div><div><span class="task-sub">下一步</span>${item.next}</div><button class="link" data-dossier="${item.company}">查看</button></div>`).join('');
+    }
+    // —— 跟进记录：弹窗、历史渲染、保存、阶段联动 ——
+    let currentFollowupCompany = null;
+    function renderFollowupHistory(company) {
+      const p = findProspect(company);
+      const list = (p && p.followUps) || [];
+      const el = document.getElementById('followup-history');
+      if (!list.length) { el.innerHTML = '<p class="muted">暂无跟进记录。添加后将自动判断开发阶段。</p>'; return; }
+      el.innerHTML = list.slice().reverse().map(f => `<div class="fact"><div class="fact-head"><div>${pill(f.type, 'blue')}<h3>${f.date}</h3></div></div><p>${f.note}</p><div class="fact-meta"><span>跟进人：${f.by || '—'}</span></div></div>`).join('');
+    }
+    function renderFollowupStage(company) {
+      const p = findProspect(company);
+      const el = document.getElementById('followup-stage');
+      if (!p) { el.textContent = '—'; el.className = 'pill slate'; return; }
+      const stage = currentStage(p);
+      el.textContent = p.stageOverride ? `${stage}（手动）` : stage;
+      el.className = 'pill ' + (STAGE_TONE[stage] || 'amber');
+    }
+    function openFollowup(company) {
+      currentFollowupCompany = company;
+      document.getElementById('followup-modal-title').textContent = `跟进记录 · ${company}`;
+      renderFollowupStage(company);
+      renderFollowupHistory(company);
+      openModal('followup-modal');
+    }
+    function saveFollowup() {
+      const company = currentFollowupCompany;
+      if (!company) return;
+      const p = findProspect(company);
+      if (!p) { showToast('该企业不在主动开发名单中'); return; }
+      const type = document.getElementById('followup-type').value;
+      const note = document.getElementById('followup-note').value.trim();
+      const by = document.getElementById('followup-by').value.trim() || 'Monk Chen';
+      if (!note) { showToast('请填写跟进内容'); return; }
+      const today = new Date().toISOString().slice(0, 10);
+      if (!p.followUps) p.followUps = [];
+      p.followUps.push({ date: today, type, note, by });
+      p.stageOverride = null; // 新增跟进后回到自动判断
+      p.updated = today;
+      // 联动刷新
+      renderProspects(); renderPriority(); renderDossierDevStatus();
+      renderFollowupStage(company); renderFollowupHistory(company);
+      document.getElementById('followup-note').value = '';
+      showToast(`${company} 已新增一条「${type}」跟进，阶段更新为 ${currentStage(p)}`);
+    }
+    function overrideStage() {
+      const company = currentFollowupCompany;
+      if (!company) return;
+      const p = findProspect(company);
+      if (!p) return;
+      const opts = ['待首次接触','已建立联系','方案沟通','商务谈判','已成交','已失联','等待机会'];
+      const choice = prompt('手动设置开发阶段（留空则恢复按跟进自动判断）：\n' + opts.map((o,i)=>`${i+1}. ${o}`).join('\n'), p.stageOverride || '');
+      if (choice === null) return;
+      const idx = parseInt(choice, 10);
+      if (!isNaN(idx) && opts[idx-1]) p.stageOverride = opts[idx-1];
+      else if (choice.trim() === '') p.stageOverride = null;
+      else p.stageOverride = choice.trim();
+      renderProspects(); renderPriority(); renderDossierDevStatus();
+      renderFollowupStage(company);
+      showToast(`已${p.stageOverride ? '手动设置' : '恢复自动判断'}阶段：${currentStage(p)}`);
+    }
+    function renderDossierDevStatus() {
+      const el = document.getElementById('dossier-dev-status');
+      if (!el) return;
+      const p = findProspect(currentDossierCompany);
+      if (!p) { el.innerHTML = '<span class="pill slate">暂无开发记录</span>'; return; }
+      const stage = currentStage(p);
+      const fuCount = (p.followUps || []).length;
+      el.innerHTML = `${pill(stage + (p.stageOverride ? '（手动）' : ''), STAGE_TONE[stage] || 'amber')}<span class="task-sub">跟进 ${fuCount} 条 · ${p.updated}</span><button class="link" data-followup="${p.company}" style="margin-left:8px">查看跟进</button>`;
+    }
+
+    function renderCompanies(filtered = dbCompanies) {
+      document.getElementById('company-table').innerHTML = filtered.map(company => `<tr><td><span class="company">${company.company}</span><span class="task-sub">官网与主体信息已建立</span></td><td>${company.country}</td><td>${company.industry}</td><td>${company.size}</td><td>${pill(company.signal, company.signalTone)}</td><td>${pill(company.profile, company.profileTone)}</td><td>${pill(company.prospect ? '已加入' : '未加入', company.prospectTone)}</td><td><div style="display:flex;gap:8px;align-items:center"><button class="link" data-company="${company.company}" data-id="${company.id}">${company.prospect ? '查看档案' : '加入开发'}</button><button class="link" data-research-company="${company.company}">发起背调</button></div></td></tr>`).join('');
+      document.getElementById('company-empty').classList.toggle('hidden', filtered.length > 0);
+    }
+    function renderProspects() {
+      document.getElementById('prospect-table').innerHTML = prospects.map(item => {
+        const stage = currentStage(item);
+        const stageTone = STAGE_TONE[stage] || 'amber';
+        const stageLabel = item.stageOverride ? `${stage}（手动）` : stage;
+        const fuCount = (item.followUps || []).length;
+        return `<tr><td><span class="company">${item.company}</span></td><td>${item.country}<span class="task-sub">${item.industry}</span></td><td>${pill(item.priority, item.priorityTone)}</td><td>${item.owner}</td><td>${pill(stageLabel, stageTone)}</td><td>${item.next}</td><td>${item.updated}</td><td><button class="link" data-followup="${item.company}">跟进${fuCount ? ` (${fuCount})` : ''}</button></td><td><button class="link" data-company="${item.company}">打开</button></td></tr>`;
+      }).join('');
+      document.getElementById('prospect-empty').classList.toggle('hidden', prospects.length > 0);
+    }
+    function filterCompanies() {
+      const page = document.getElementById('companies');
+      const selects = [...page.querySelectorAll('.select')];
+      const search = page.querySelector('.search').value.trim().toLowerCase();
+      const country = selects[0].value;
+      const industry = selects[1].value;
+      const size = selects[2].value;
+      const status = selects[3].value;
+      const filtered = dbCompanies.filter(company => {
+        const countryMatch = country === '全部国家' || company.country === country;
+        const industryMatch = industry === '全部行业' || company.industry === industry;
+        const sizeMatch = size === '全部规模' || (size === '规模 100+' ? company.size !== '规模未知' : company.size === '规模未知');
+        const statusMatch = status === '全部资料状态' || company.profile === status;
+        const searchMatch = !search || `${company.company} ${company.country} ${company.industry}`.toLowerCase().includes(search);
+        return countryMatch && industryMatch && sizeMatch && statusMatch && searchMatch;
+      });
+      renderCompanies(filtered);
+    }
+
+    // 数据库（客户背调 / 主动开发数据底座）联调
+    let dbCompanies = companies.slice();
+    function findCompany(name) {
+      return dbCompanies.find(item => item.company === name) || companies.find(item => item.company === name);
+    }
+    // 从数据库记录自动带出背调表单所需字段（均可编辑，提交前用户可改）
+    function prefillResearchFromRecord(rec) {
+      if (!rec) return;
+      const set = (id, v) => { const el = document.getElementById(id); if (el) el.value = (v == null ? '' : String(v)); };
+      set('company-name', rec.company);
+      set('country', rec.country);          // 与表单国家下拉项一致（5 国白名单）
+      set('domain', rec.domain);            // 数据库记录的官方域名
+      set('product', rec.industry);         // 目标产品/类别默认带出行业，用户改为具体 VIGOR 产品
+      // 研究类型按资料状态（准入规则）给出默认建议，用户可改
+      const profile = rec.profile || '';
+      const researchType = profile === '待复核' ? '初筛（30 天）'
+        : profile === '研究中' ? '机会专项（30 天）'
+        : '深研（90 天）'; // 已验证 / 需要更新 / 已过期 / 未识别 → 默认深研
+      set('research-type', researchType);
+    }
+    async function loadDatabase() {
+      const loadingEl = document.getElementById('company-loading');
+      const errEl = document.getElementById('company-error');
+      if (loadingEl) loadingEl.classList.remove('hidden');
+      if (errEl) errEl.classList.add('hidden');
+      try {
+        const res = await apiFetch(`${RESEARCH_API}/api/customer-research/database`);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        dbCompanies = (data.profiles || []).filter(p => p.included !== false);
+        if (loadingEl) loadingEl.classList.add('hidden');
+        filterCompanies();
+      } catch (e) {
+        if (loadingEl) loadingEl.classList.add('hidden');
+        if (!dbCompanies.length) dbCompanies = companies.slice();
+        filterCompanies();
+        if (errEl) errEl.classList.remove('hidden');
+        if (!e.unreachable) console.warn('数据库读取失败，已降级为本地种子：', e.message);
+      }
+    }
+    // —— 数据库目标配置（区域 / 国家 / 客户类型 / 数量 / 频率）——
+    const CFG_COUNTRIES = ['Norway', 'United Kingdom', 'Nigeria', 'Angola', 'Brazil'];
+    const CFG_TYPES = ['Oilfield service', 'Drilling', 'Manufacturer', 'Project contractor', 'EPC'];
+    const REGION_LABEL = { global: '全球', europe: '欧洲', africa: '非洲', south_america: '南美', asia_pacific: '亚太', custom: '自定义' };
+    const FREQ_LABEL = { daily: '日', weekly: '周', monthly: '30 天', manual: '手动' };
+    // 区域 -> 国家预设（与后端一致；选区域即换国家）
+    const REGION_COUNTRIES = {
+      global: ['Norway', 'United Kingdom', 'Nigeria', 'Angola', 'Brazil'],
+      europe: ['Norway', 'United Kingdom'],
+      africa: ['Nigeria', 'Angola'],
+      south_america: ['Brazil'],
+      asia_pacific: [],
+      custom: []
+    };
+    let dbConfig = null; // 当前数据库目标配置（来自 /api/customer-research/database/status.requirements）
+
+    async function loadDatabaseStatus() {
+      try {
+        const res = await apiFetch(`${RESEARCH_API}/api/customer-research/database/status`);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+    const s = await res.json();
+    dbConfig = s.requirements || null;
+    const fmt = (iso) => iso ? new Date(iso).toLocaleString('zh-CN', { hour12: false }) : '—';
+    const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+    set('db-last-update', fmt(s.lastUpdatedAt));
+    set('db-next-update', fmt(s.nextScheduledAt));
+    if (s.requirements) {
+      const freqSeg = s.requirements.refreshFrequency === 'manual' ? '手动更新' : `每${FREQ_LABEL[s.requirements.refreshFrequency] || s.requirements.refreshFrequency}更新`;
+      set('db-rule', `${REGION_LABEL[s.requirements.region] || s.requirements.region} · ${s.requirements.requiredCountries.length} 国 · ${s.requirements.requiredIndustries.length} 类 · 目标 ${s.requirements.targetCount} 家 · ${freqSeg}`);
+    }
+        const cl = document.getElementById('db-changelog');
+        if (cl) {
+          const items = (s.changelog || []).slice(0, 5);
+          cl.innerHTML = items.length
+            ? '<strong>近期变更</strong>' + items.map(it => `<div class="db-change">· ${it.company}：${it.detail} <span class="muted">${new Date(it.ts).toLocaleString('zh-CN', { hour12: false })}</span></div>`).join('')
+            : '<span class="muted">暂无变更记录</span>';
+          cl.classList.remove('hidden');
+        }
+      } catch (e) { /* 状态栏读取失败不阻断表格渲染 */ }
+    }
+
+    // —— 目标配置弹窗：渲染勾选项、打开、保存、区域预置国家 ——
+    function renderCfgChecks() {
+      document.getElementById('cfg-countries').innerHTML = CFG_COUNTRIES.map(c => `<label><input type="checkbox" value="${c}" data-cfg-country /> ${c}</label>`).join('');
+      document.getElementById('cfg-types').innerHTML = CFG_TYPES.map(t => `<label><input type="checkbox" value="${t}" data-cfg-type /> ${t}</label>`).join('');
+    }
+    function openDbConfig() {
+      const cfg = dbConfig || { region: 'global', requiredCountries: CFG_COUNTRIES.slice(), requiredIndustries: CFG_TYPES.slice(), targetCount: 50, refreshFrequency: 'daily' };
+      document.getElementById('cfg-region').value = cfg.region || 'global';
+      document.getElementById('cfg-count').value = (cfg.targetCount != null) ? cfg.targetCount : 50;
+      document.getElementById('cfg-frequency').value = cfg.refreshFrequency || 'daily';
+      const countries = new Set(cfg.requiredCountries || []);
+      const types = new Set(cfg.requiredIndustries || []);
+      document.querySelectorAll('[data-cfg-country]').forEach(cb => { cb.checked = countries.has(cb.value); });
+      document.querySelectorAll('[data-cfg-type]').forEach(cb => { cb.checked = types.has(cb.value); });
+      openModal('db-config-modal');
+    }
+    async function saveDbConfig() {
+      const region = document.getElementById('cfg-region').value;
+      const countries = [...document.querySelectorAll('[data-cfg-country]:checked')].map(cb => cb.value);
+      const types = [...document.querySelectorAll('[data-cfg-type]:checked')].map(cb => cb.value);
+      const targetCount = parseInt(document.getElementById('cfg-count').value, 10);
+      const refreshFrequency = document.getElementById('cfg-frequency').value;
+      if (!countries.length) { showToast('请至少选择一个目标国家'); return; }
+      if (!types.length) { showToast('请至少选择一个目标客户类型'); return; }
+      const body = { region, requiredCountries: countries, requiredIndustries: types, targetCount: Number.isFinite(targetCount) ? targetCount : 50, refreshFrequency };
+      try {
+        const res = await apiFetch(`${RESEARCH_API}/api/customer-research/database/config`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        dbConfig = (data.status && data.status.requirements) || body;
+        closeModal('db-config-modal');
+        await loadDatabase(); await loadDatabaseStatus();
+        showToast('已按新目标配置刷新数据库' + (refreshFrequency === 'manual' ? '（手动更新模式）' : ''));
+      } catch (e) { showToast('保存目标配置失败：' + e.message); }
+    }
+
+    async function markProspectApi(id, added) {
+      try {
+        const res = await apiFetch(`${RESEARCH_API}/api/customer-research/database/${id}/prospect`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ added })
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return await res.json();
+      } catch (e) { showToast(`更新开发状态失败：${e.message}`); return null; }
+    }
+    async function refreshDatabase() {
+      const btn = document.getElementById('db-refresh');
+      if (btn) { btn.disabled = true; btn.textContent = '更新中…'; }
+      try {
+        const res = await apiFetch(`${RESEARCH_API}/api/customer-research/database/refresh`, { method: 'POST' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        showToast('数据库已按准入规则刷新');
+      } catch (e) { showToast(`刷新失败：${e.message}`); }
+      finally {
+        if (btn) { btn.disabled = false; btn.textContent = '立即更新'; }
+        await loadDatabaseStatus();
+        await loadDatabase();
+      }
+    }
+    function renderReport(r, targetId) {
+      const body = document.getElementById(targetId || 'report-body');
+      if (!r || !r.profile) {
+        body.innerHTML = '<div class="state-box"><strong>暂无报告</strong><span>发起一份研究后，AI 生成的报告将显示在此处。所有内容均按事实 / 推断 / 未知分层并保留来源。</span></div>';
+        return;
+      }
+      const p = r.profile || {};
+      const isDD = r.reportType === 'company_analysis' ? false : true;
+      const typeLabel = isDD ? '客户背调（Due Diligence）' : '主动开发（Company Analysis）';
+      const score = r.matchScore != null ? r.matchScore : '—';
+      const dims = (r.matchDimensions || []).map(d => `<div class="dim"><span>${escapeHtml(d.label)}</span><span class="dim-score">${escapeHtml(d.score != null ? d.score : '—')}/10</span><small>${escapeHtml(d.note || '')}</small></div>`).join('');
+      const list = (arr) => (Array.isArray(arr) && arr.length ? `<ul>${arr.map(x => `<li>${escapeHtml(x)}</li>`).join('')}</ul>` : '<p class="muted">—</p>');
+      const kvRows = (pairs) => pairs.map(([k, v]) => `<tr><th>${escapeHtml(k)}</th><td>${escapeHtml(v || '—')}</td></tr>`).join('');
+      const profRows = kvRows([
+        ['全称 / 品牌', [p.fullName, p.brandName].filter(Boolean).join(' / ')],
+        ['曾用名', p.formerNames],
+        ['成立', p.founded],
+        ['总部 / 注册地', p.hq],
+        ['股权 / 实控', p.ownership],
+        ['管理层', p.management],
+        ['员工规模', p.employeeSize != null ? `${p.employeeSize} 人` : (p.employeeSizeNote || '未知')],
+        ['资质 / 上市', p.certifications],
+        ['官网', p.website],
+        ['通用邮箱', p.generalEmail],
+        ['技术联系人', p.technicalContact]
+      ]);
+      const reg = r.registry || {};
+      const regRows = kvRows([
+        ['公司类型 / 法律形式', reg.legalForm],
+        ['注册号', reg.registrationNo],
+        ['注册资本', reg.registeredCapital],
+        ['注册地址', reg.registeredAddress],
+        ['法定代表人 / CEO', reg.legalRepresentative],
+        ['股权结构', reg.shareholders],
+        ['上市交易所 / 代码', reg.exchange]
+      ]);
+      const ws = (r.whiteSpaceGaps || []).map(g => `<li><strong>${escapeHtml(g.vigorProduct || '')}</strong> — 匹配度：${escapeHtml(g.fit || '')}。<span>${escapeHtml(g.note || '')}</span></li>`).join('');
+      const kp = (r.keyPersonnel || []).map(c => `<tr><td>${escapeHtml(c.name || '—')}</td><td>${escapeHtml(c.title || '—')}</td><td>${escapeHtml(c.email || c.phone || '—')}</td><td>${c.isDecisionMaker ? '<span class="pill red">决策人</span>' : '<span class="pill slate">联系人</span>'}</td></tr>`).join('');
+      const steps = (r.nextSteps || []).map(s => `<li>${escapeHtml(s)}</li>`).join('');
+      const riskTone = (lvl) => (lvl === 'high' ? 'red' : lvl === 'medium' ? 'amber' : 'slate');
+      const riskRows = (r.riskAssessment || []).map(x => `<tr><td>${escapeHtml(x.category || '—')}</td><td>${pill(escapeHtml(x.level || 'low'), riskTone(x.level))}</td><td>${escapeHtml(x.note || '')}</td></tr>`).join('');
+      const discRows = (r.discrepancies || []).map(d => `<tr><td>${escapeHtml(d.websiteClaim || '—')}</td><td>${escapeHtml(d.officialRecord || '—')}</td><td>${escapeHtml(d.note || '')}</td></tr>`).join('');
+      const litRows = (r.litigationTable || []).map(t => `<tr><td>${escapeHtml(t.caseName || '—')}</td><td>${escapeHtml(t.authority || '—')}</td><td>${escapeHtml(t.date || '—')}</td><td>${escapeHtml(t.summary || '')}</td><td>${escapeHtml(t.source || '')}</td></tr>`).join('');
+      const lc = r.legalCompliance || {};
+      const rep = r.reputation || {};
+      const psRows = (r.productsServices || []).map(x => `<tr><td>${escapeHtml(x.name || '—')}</td><td>${escapeHtml(x.detail || '')}</td></tr>`).join('');
+      const cust = r.customers || {};
+      const contractRows = (cust.contracts || []).map(c => `<tr><td>${escapeHtml(c.project || '—')}</td><td>${escapeHtml(c.customer || '—')}</td><td>${escapeHtml(c.amount || '—')}</td><td>${escapeHtml(c.term || '—')}</td><td>${escapeHtml(c.note || '')}</td></tr>`).join('');
+      const sup = r.suppliers || {};
+      const supRows = (sup.table || []).map(s => `<tr><td>${escapeHtml(s.name || '—')}</td><td>${escapeHtml(s.category || '—')}</td><td>${escapeHtml(s.note || '')}</td></tr>`).join('');
+      const subRows = (sup.subsidiaries || []).map(s => `<tr><td>${escapeHtml(s.name || '—')}</td><td>${escapeHtml(s.relation || '—')}</td><td>${escapeHtml(s.detail || '')}</td></tr>`).join('');
+      const fin = r.financials || {};
+      const finRows = (fin.table || []).map(f => `<tr><td>${escapeHtml(f.metric || '—')}</td><td>${escapeHtml(f.period1 || '—')}</td><td>${escapeHtml(f.period2 || '—')}</td><td>${escapeHtml(f.growth || '—')}</td></tr>`).join('');
+      const stratRows = (r.strategyOutlook || []).map(x => `<li><strong>${escapeHtml(x.theme || '')}</strong> — ${escapeHtml(x.detail || '')}</li>`).join('');
+
+      // —— 多模型交叉验证面板 ——
+      const cv = r.crossValidation;
+      let cvHtml = '';
+      if (cv) {
+        if (cv.mode === 'dual') {
+          const rate = Math.round((cv.agreementRate || 0) * 100);
+          const conf = cv.confidenceScore || '—';
+          const confTone = conf === 'high' ? 'green' : conf === 'medium' ? 'amber' : 'slate';
+          const conflictItems = (cv.conflicts || []).map(c => `<li><strong>${escapeHtml(c.field)}</strong>：模型A「${escapeHtml(c.valueA)}」 ↔ 模型B「${escapeHtml(c.valueB)}」</li>`).join('');
+          const singleItems = (cv.singleSource || []).map(s => `<li><strong>${escapeHtml(s.field)}</strong>：仅 ${escapeHtml(s.provider)} 提供「${escapeHtml(s.value)}」</li>`).join('');
+          cvHtml = `
+        <h2>多模型交叉验证</h2>
+        <div class="cv-box">
+          <div class="cv-top"><span class="pill green">已启用双模型互验</span><span class="cv-providers">参与模型：${escapeHtml((cv.providers || []).join(' + '))}</span></div>
+          <div class="cv-meta">
+            <div><span class="cv-num">${rate}%</span><label>字段一致率</label></div>
+            <div><span class="cv-num">${cv.agreedCount || 0}</span><label>一致字段</label></div>
+            <div><span class="cv-num">${cv.conflictCount || 0}</span><label>冲突字段</label></div>
+            <div><span class="cv-num">${cv.singleSourceCount || 0}</span><label>单源待核</label></div>
+            <div><span class="cv-num">${pill(escapeHtml(conf), confTone)}</span><label>交叉验证置信</label></div>
+          </div>
+          ${conflictItems ? `<h3 class="cv-sub">冲突清单（需人工复核）</h3><ul class="cv-list">${conflictItems}</ul>` : ''}
+          ${singleItems ? `<h3 class="cv-sub">单源信息（仅一方提供，待核）</h3><ul class="cv-list">${singleItems}</ul>` : ''}
+          ${!conflictItems && !singleItems ? '<p class="muted">两模型在可比字段上完全一致，无冲突与单源项。</p>' : ''}
+        </div>`;
+        } else {
+          cvHtml = `
+        <h2>多模型交叉验证</h2>
+        <div class="cv-box">
+          <div class="cv-top"><span class="pill slate">单模型模式</span><span>${escapeHtml(cv.note || '未启用交叉验证')}</span></div>
+        </div>`;
+        }
+      }
+
+      let html = `
+        <h1>${escapeHtml(p.fullName || '未知公司')} | ${escapeHtml(typeLabel)}</h1>
+        <p class="lede">${escapeHtml(r.perspective || '')} · 综合匹配度 <strong>${escapeHtml(String(score))}/10</strong> · 数据来源：${escapeHtml((r.dataSources || []).join('、') || '—')}</p>
+        <div class="report-summary"><strong>一句话定性：</strong>${escapeHtml(r.oneLineSummary || '—')}</div>
+        <div class="notice"><strong>!</strong><span>正式报告只呈现经过来源支持并完成审核的事实。AI 推断与资料不足项单独标记，不得作为客户事实或导出到同步文件。</span></div>
+        ${cvHtml}
+        <h2>综合匹配度评分</h2>
+        <div class="dims">${dims || '<p class="muted">—</p>'}</div>
+        <p>${escapeHtml(r.matchSummary || '')}</p>
+        <h2>公司画像</h2>
+        <table class="profile-table"><tbody>${profRows}</tbody></table>`;
+
+      if (isDD) {
+        html += `
+        <h2>工商登记核验</h2>
+        <table class="profile-table"><tbody>${regRows}</tbody></table>
+        ${r.websiteVerification ? `<h3 style="margin:14px 0 4px;color:#475569">官网内容核验</h3><p>${escapeHtml(r.websiteVerification)}</p>` : ''}
+        ${discRows ? `<h3 style="margin:14px 0 4px;color:#475569">官网信息与官方登记差异说明</h3><div class="table-wrap"><table><thead><tr><th>官网信息</th><th>官方登记 / 第三方记录</th><th>差异说明</th></tr></thead><tbody>${discRows}</tbody></table></div>` : ''}
+        <h2>法律与合规</h2>
+        ${lc.litigation ? `<p><strong>诉讼情况：</strong>${escapeHtml(lc.litigation)}</p>` : ''}
+        ${lc.administrativePenalty ? `<p><strong>行政处罚 / 检查：</strong>${escapeHtml(lc.administrativePenalty)}</p>` : ''}
+        ${lc.sanctions ? `<p><strong>制裁 / 黑名单：</strong>${escapeHtml(lc.sanctions)}</p>` : ''}
+        ${litRows ? `<div class="table-wrap" style="margin-top:8px"><table><thead><tr><th>案件 / 处罚名称</th><th>法院 / 机构</th><th>日期</th><th>摘要</th><th>来源链接</th></tr></thead><tbody>${litRows}</tbody></table></div>` : ''}
+        <h2>媒体与口碑</h2>
+        ${rep.news ? `<p><strong>新闻报道：</strong>${escapeHtml(rep.news)}</p>` : ''}
+        ${rep.industryReview ? `<p><strong>行业评价：</strong>${escapeHtml(rep.industryReview)}</p>` : ''}
+        ${rep.customerReview ? `<p><strong>客户评价：</strong>${escapeHtml(rep.customerReview)}</p>` : ''}
+        ${rep.employeeReview ? `<p><strong>员工评价：</strong>${escapeHtml(rep.employeeReview)}</p>` : ''}
+        ${rep.social ? `<p><strong>社交媒体 / 论坛：</strong>${escapeHtml(rep.social)}</p>` : ''}
+        <h2>风险评估</h2>
+        ${riskRows ? `<div class="table-wrap"><table><thead><tr><th>风险类别</th><th>等级</th><th>说明</th></tr></thead><tbody>${riskRows}</tbody></table></div>` : '<p class="muted">—</p>'}
+        ${r.verificationChecklist && r.verificationChecklist.length ? `<h2>结论与建议 · 核实清单</h2><ol>${r.verificationChecklist.map(x => `<li>${escapeHtml(x)}</li>`).join('')}</ol>` : ''}`;
+      } else {
+        html += `
+        <h2>主要产品与服务</h2>
+        ${psRows ? `<div class="table-wrap"><table><thead><tr><th>业务板块</th><th>说明</th></tr></thead><tbody>${psRows}</tbody></table></div>` : '<p class="muted">—</p>'}
+        <h2>主要客户分析</h2>
+        ${cust.overview ? `<p>${escapeHtml(cust.overview)}</p>` : ''}
+        ${contractRows ? `<div class="table-wrap" style="margin-top:8px"><table><thead><tr><th>项目 / 合同</th><th>客户</th><th>合同金额</th><th>期限</th><th>说明</th></tr></thead><tbody>${contractRows}</tbody></table></div>` : ''}
+        <h2>供应商与供应链分析</h2>
+        ${sup.overview ? `<p>${escapeHtml(sup.overview)}</p>` : ''}
+        ${supRows ? `<div class="table-wrap" style="margin-top:8px"><table><thead><tr><th>供应商 / 来源</th><th>供应品类</th><th>说明</th></tr></thead><tbody>${supRows}</tbody></table></div>` : ''}
+        ${subRows ? `<h3 style="margin:14px 0 4px;color:#475569">子公司内部供应链</h3><div class="table-wrap"><table><thead><tr><th>子公司</th><th>关系</th><th>主要交易内容</th></tr></thead><tbody>${subRows}</tbody></table></div>` : ''}
+        <h2>财务与运营概况</h2>
+        ${fin.narrative ? `<p>${escapeHtml(fin.narrative)}</p>` : ''}
+        ${finRows ? `<div class="table-wrap" style="margin-top:8px"><table><thead><tr><th>财务指标</th><th>期间 1</th><th>期间 2</th><th>同比增长</th></tr></thead><tbody>${finRows}</tbody></table></div>` : ''}
+        <h2>战略方向与发展前景</h2>
+        ${stratRows ? `<ul>${stratRows}</ul>` : '<p class="muted">—</p>'}`;
+      }
+
+      // —— 详尽可能性汇总层（核心优势 / 运营指标 / 风险汇总，两种原型共用）——
+      const strengthItems = (r.strengths || []).map(s => `<li>${escapeHtml(s)}</li>`).join('');
+      const omRows = (r.operationalMetrics || []).map(m => `<tr><td>${escapeHtml(m.metric || '—')}</td><td>${escapeHtml(m.value || '—')}</td><td>${escapeHtml(m.note || '')}</td></tr>`).join('');
+
+      html += `
+        <h2>核心优势与运营指标</h2>
+        ${strengthItems ? `<h3 style="margin:14px 0 4px;color:#475569">核心优势</h3><ul>${strengthItems}</ul>` : ''}
+        ${omRows ? `<h3 style="margin:14px 0 4px;color:#475569">关键运营指标</h3><div class="table-wrap"><table><thead><tr><th>指标</th><th>数值</th><th>说明</th></tr></thead><tbody>${omRows}</tbody></table></div>` : ''}
+        ${r.riskSummary ? `<h3 style="margin:14px 0 4px;color:#475569">潜在风险汇总</h3><p>${escapeHtml(r.riskSummary)}</p>` : ''}
+        <h2>经营情况</h2>
+        <p>${escapeHtml(r.businessModel || '—')}</p>
+        <h3 style="margin:14px 0 4px;color:#475569">收入来源</h3>${list(r.revenueStreams)}
+        <h3 style="margin:14px 0 4px;color:#475569">发展里程碑</h3>${list(r.milestones)}
+        <h3 style="margin:14px 0 4px;color:#475569">业务 / 产品服务线</h3>${list(r.businessLines)}
+        <h2>白空间隙映射（VIGOR 产品切入）</h2>${ws ? `<ul>${ws}</ul>` : '<p class="muted">—</p>'}
+        <h2>推荐定位</h2>
+        <p>${escapeHtml(r.recommendedPositioning || '—')}${r.differentiation ? ` · ${escapeHtml(r.differentiation)}` : ''}</p>
+        <h2>关键联系人</h2>
+        ${kp ? `<table><thead><tr><th>姓名</th><th>职位</th><th>联系方式</th><th>类型</th></tr></thead><tbody>${kp}</tbody></table>` : '<p class="muted">—</p>'}
+        <h2>下一步建议</h2>${steps ? `<ol>${steps}</ol>` : '<p class="muted">—</p>'}
+        ${r.competitiveLandscape ? `<h2>竞争格局</h2><p>${escapeHtml(r.competitiveLandscape)}</p>` : ''}
+        ${r.disclaimer ? `<div class="notice"><strong>!</strong><span>${escapeHtml(r.disclaimer)}</span></div>` : ''}
+      `;
+      body.innerHTML = html;
+    }
+    function renderTasks() {
+      document.getElementById('task-table').innerHTML = tasks.map(task => `<tr><td><span class="company">${task.company}</span><span class="task-sub">${task.id}</span></td><td>${task.country}</td><td>${pill(task.type, 'blue')}</td><td>${pill(task.status, task.tone)}</td><td>${task.evidence}</td><td>${task.expiry}</td><td>${task.owner}</td><td><button class="link" data-go="${task.company === 'Deep Industries' ? 'dossier' : 'tasks'}">查看</button></td></tr>`).join('');
+    }
+    // 客户档案：按当前调研对象生成事实列表（Deep Industries 用既有示例叙事，其余按数据库快照生成，保证调研对象一致）
+    function dossierFactsForCompany(company) {
+      if (company === 'Deep Industries') return facts;
+      const c = findCompany(company);
+      if (!c) return facts;
+      return [
+        { type: 'fact', label: '已验证事实', title: '主体与官网', text: `${c.company}（${c.country}）为 ${c.industry} 行业主体，规模 ${c.size || '未知'}，官网 ${c.domain || '未收录'}。该信息来自数据库快照，发布前需复核来源记录。`, source: '数据库快照 · 示例', time: `更新 ${c.updated || '—'}`, tone: 'green' },
+        { type: 'fact', label: '已验证事实', title: '机会信号', text: `当前机会信号：${c.signal}`, source: '数据库快照', time: '', tone: c.signalTone || 'slate' },
+        { type: 'inference', label: 'AI 推断 / 待核验', title: '潜在开发方向', text: `基于其行业与地区，可作为主动开发候选；具体产品匹配与决策链需深研确认，不应作为已确认客户需求呈现。`, source: '推断 · 示例', time: '模型输出待复核', tone: 'purple' },
+        { type: 'unknown', label: '资料不足', title: '决策链与竞争格局待补充', text: '决策链、完整竞争格局与深度产品匹配将在基础研究闭环通过验收后补充。', source: '证据缺口', time: '行动：请求补充来源', tone: 'slate' }
+      ];
+    }
+    function renderFacts(filter='all') {
+      const all = dossierFactsForCompany(currentDossierCompany);
+      const items = filter === 'all' ? all : all.filter(f => f.type === filter);
+      document.getElementById('facts').innerHTML = items.map(f => `<article class="fact"><div class="fact-head"><div>${pill(f.label, f.tone)}<h3>${f.title}</h3></div><button class="link" aria-label="展开来源详情">查看来源</button></div><p>${f.text}</p><div class="fact-meta"><span>${f.source}</span><span>•</span><span>${f.time}</span></div></article>`).join('');
+    }
+    // 客户档案：档案区块左侧导航切换（与事实筛选工具栏同源渲染）
+    const DOSSIER_FACT_MAP = { summary: 'all', fact: 'fact', inference: 'inference', unknown: 'unknown' };
+    function setDossierSection(section) {
+      currentDossierSection = section;
+      document.querySelectorAll('.side-list [data-section]').forEach(b => b.classList.toggle('active', b.dataset.section === section));
+      const factsEl = document.getElementById('facts');
+      const toolbar = document.getElementById('dossier-toolbar');
+      if (section in DOSSIER_FACT_MAP) {
+        toolbar.classList.remove('hidden');
+        renderFacts(DOSSIER_FACT_MAP[section]);
+        document.querySelectorAll('.fact-filter').forEach(btn => { btn.className = 'button ' + (btn.dataset.filter === DOSSIER_FACT_MAP[section] ? 'primary' : 'secondary') + ' fact-filter'; });
+        return;
+      }
+      toolbar.classList.add('hidden');
+      if (section === 'contacts') {
+        if (currentDossierCompany === 'Deep Industries') {
+          factsEl.innerHTML = `<article class="fact"><div class="fact-head"><div>${pill('公开职业联系人', 'blue')}<h3>公开职业联系人</h3></div></div><p class="muted">以下为示例公开联系人；生产环境每条需含来源、核验日期、可采字段与报告生命周期状态。</p><div class="table-wrap"><table><thead><tr><th>姓名</th><th>职务</th><th>邮箱</th><th>角色</th></tr></thead><tbody>${dossierContacts.map(c => `<tr><td>${c.name}</td><td>${c.title}</td><td>${c.email}</td><td>${c.decision ? '<span class="pill red">决策人</span>' : '<span class="pill slate">联系人</span>'}</td></tr>`).join('')}</tbody></table></div></article>`;
+        } else {
+          factsEl.innerHTML = `<article class="fact"><div class="fact-head"><div>${pill('公开职业联系人', 'blue')}<h3>公开职业联系人</h3></div></div><p class="muted">${currentDossierCompany} 的公开职业联系人待深研生成（生产环境每条需含来源、核验日期、可采字段与报告生命周期状态）。</p></article>`;
+        }
+        return;
+      }
+      if (section === 'history') {
+        if (currentDossierCompany === 'Deep Industries') {
+          factsEl.innerHTML = `<article class="fact"><div class="fact-head"><div>${pill('报告历史', 'slate')}<h3>报告历史</h3></div></div><div class="table-wrap"><table><thead><tr><th>版本</th><th>状态</th><th>日期</th><th>作者</th><th>说明</th></tr></thead><tbody>${reportHistory.map(h => `<tr><td>${h.version}</td><td>${pill(h.status, h.status.includes('审核') ? 'amber' : 'green')}</td><td>${h.date}</td><td>${h.author}</td><td>${h.note}</td></tr>`).join('')}</tbody></table></div></article>`;
+        } else {
+          factsEl.innerHTML = `<article class="fact"><div class="fact-head"><div>${pill('报告历史', 'slate')}<h3>报告历史</h3></div></div><p class="muted">${currentDossierCompany} 的深研报告尚未生成，历史记录待创建。</p></article>`;
+        }
+        return;
+      }
+    }
+    // 客户档案：按调研对象（currentDossierCompany）从数据库记录渲染标题/国家/行业/状态/有效期，保证与数据库一致
+    function renderDossier(company) {
+      const c = findCompany(company);
+      if (!c) return;
+      currentDossierCompany = company;
+      const titleEl = document.getElementById('dossier-title');
+      const ledeEl = document.getElementById('dossier-lede');
+      const metaEl = document.getElementById('dossier-meta');
+      const validEl = document.getElementById('dossier-validity');
+      if (titleEl) titleEl.textContent = c.company;
+      if (ledeEl) ledeEl.textContent = `${c.country} · 官网：${c.domain || '—'} · 目标类别：${c.industry}`;
+      if (metaEl) {
+        const studyType = c.profile === '已验证' ? '深研' : (c.prospect ? '主动开发' : '初筛');
+        metaEl.innerHTML = `${pill(studyType, 'blue')}${pill(c.profile, c.profileTone || 'amber')}${pill('示例数据', 'slate')}`;
+      }
+      if (validEl) validEl.textContent = `${((dbConfig && dbConfig.ttlDays) || 30)} 天有效期`;
+      setDossierSection(currentDossierSection || 'summary');
+      renderDossierDevStatus();
+    }
+    function renderSources() {
+      document.getElementById('source-list').innerHTML = sources.map(source => `<div class="source-row"><div><strong>${source[0]}</strong><span class="task-sub">抓取、快照与导出均受来源策略约束</span></div><div>${source[1]}</div><div>${pill(source[2], 'slate')}</div><div>${source[3]}</div><div>${pill(source[4], source[4] === 'Approved' ? 'green' : 'amber')}</div></div>`).join('');
+    }
+    function renderExports() {
+      loadExportAudit();
+      loadExportRuns();
+    }
+    // 从后端加载导出审计（实时，替代原型静态数据）
+    async function loadExportAudit() {
+      const tbody = document.getElementById('export-table');
+      if (!tbody) return;
+      try {
+        const res = await apiFetch(`${RESEARCH_API}/api/customer-research/exports`);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        const rows = data.exports || [];
+        if (!rows.length) {
+          tbody.innerHTML = '<tr><td colspan="6"><div class="state-box"><strong>暂无导出记录</strong><span>完成一份研究并点击「下载 CSV」后，审计记录会显示在这里。</span></div></td></tr>';
+          return;
+        }
+        tbody.innerHTML = rows.map(r => {
+          const ts = r.exportedAt ? new Date(r.exportedAt).toLocaleString('zh-CN', { hour12: false }) : '—';
+          const fmt = (r.format || 'csv').toLowerCase();
+          const fmtPill = fmt === 'xlsx' ? 'blue' : (fmt === 'pdf' ? 'slate' : 'green');
+          const statusLabel = r.status === 'ok' ? '已完成' : (r.status === 'printed' ? '已打印' : (r.status || 'done'));
+          return `<tr><td class="company">${escapeHtml(r.company || r.runId || '—')}</td><td>${pill(fmt.toUpperCase(), fmtPill)}</td><td>${ts}</td><td>${r.rowCount || 0}</td><td>${r.byteSize || 0}</td><td>${pill(statusLabel, 'green')}</td></tr>`;
+        }).join('');
+      } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="6"><div class="state-box"><strong>导出记录加载失败</strong><span>${e.unreachable ? e.message : '错误：' + escapeHtml(e.message)}</span></div></td></tr>`;
+      }
+    }
+    // 从后端加载已完成的研究运行，填充导出选择器
+    async function loadExportRuns() {
+      const sel = document.getElementById('export-run-select');
+      const loading = document.getElementById('export-loading');
+      if (!sel) return;
+      if (loading) loading.classList.remove('hidden');
+      try {
+        const res = await apiFetch(`${RESEARCH_API}/api/customer-research/research-runs`);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        const completed = (data.runs || []).filter(r => r.status === 'PENDING_REVIEW' || r.status === 'COMPLETED');
+        if (!completed.length) {
+          sel.innerHTML = '<option value="">暂无可导出报告（请先完成一份研究）</option>';
+          return;
+        }
+        sel.innerHTML = '<option value="">选择已完成报告…</option>' + completed.map(r => {
+          const label = `${escapeHtml((r.result && r.result.company) || '报告')} · ${r.status === 'COMPLETED' ? '已发布' : '待审核'} · ${r.id.slice(0, 8)}`;
+          return `<option value="${r.id}">${label}</option>`;
+        }).join('');
+      } catch (e) {
+        sel.innerHTML = '<option value="">加载失败：' + (e.unreachable ? '后端不可达' : escapeHtml(e.message)) + '</option>';
+      } finally {
+        if (loading) loading.classList.add('hidden');
+      }
+    }
+    // 真实导出（CSV / Excel）：POST 后端生成文件，前端以 Blob 触发下载；并刷新审计与选择器
+    async function downloadFile(kind) {
+      const sel = document.getElementById('export-run-select');
+      const runId = sel && sel.value;
+      if (!runId) { showToast('请先在上方选择一个已完成报告'); return; }
+      const btn = document.getElementById(kind === 'xlsx' ? 'export-xlsx' : 'export-csv');
+      const label = kind === 'xlsx' ? '下载 Excel' : '下载 CSV';
+      if (btn) { btn.disabled = true; btn.textContent = '生成中…'; }
+      try {
+        const res = await apiFetch(`${RESEARCH_API}/api/customer-research/exports/${kind}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ runId })
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.error || ('HTTP ' + res.status));
+        }
+        const blob = await res.blob();
+        const cd = res.headers.get('Content-Disposition') || '';
+        const m = cd.match(/filename="?([^";]+)"?/);
+        const ext = kind === 'xlsx' ? 'xlsx' : 'csv';
+        const filename = m ? m[1] : `customer-research_${runId.slice(0, 8)}.${ext}`;
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = filename;
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        showToast(`已导出 ${kind.toUpperCase()}：${filename}（${blob.size} 字节，已记录审计）`);
+        loadExportAudit();
+        loadExportRuns();
+      } catch (e) {
+        showToast(`导出失败：${e.unreachable ? e.message : escapeHtml(e.message)}`);
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = label; }
+      }
+    }
+    function downloadCsv() { return downloadFile('csv'); }
+    function downloadXlsx() { return downloadFile('xlsx'); }
+
+    // 导出 PDF（浏览器原生打印）：拉取该报告原始数据，渲染为干净打印视图，CJK 由浏览器字体保证不乱码；
+    // 触发前先向后端记录一次 pdf 导出审计（状态 printed）。
+    async function exportPdf() {
+      const sel = document.getElementById('export-run-select');
+      const runId = sel && sel.value;
+      if (!runId) { showToast('请先在上方选择一个已完成报告'); return; }
+      const btn = document.getElementById('export-pdf');
+      if (btn) { btn.disabled = true; btn.textContent = '准备中…'; }
+      try {
+        const res = await apiFetch(`${RESEARCH_API}/api/customer-research/research-runs/${runId}`);
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.error || ('HTTP ' + res.status));
+        }
+        const run = await res.json();
+        const win = window.open('', '_blank');
+        if (!win) throw new Error('浏览器拦截了打印窗口，请允许弹出窗口后重试');
+        win.document.open();
+        win.document.write(buildPrintHtml(run));
+        win.document.close();
+        // 记录审计（前端打印动作）
+        try {
+          await apiFetch(`${RESEARCH_API}/api/customer-research/exports/record`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ runId, note: 'browser-print' })
+          });
+          loadExportAudit();
+        } catch (_) { /* 审计失败不应阻断打印 */ }
+        win.focus();
+        setTimeout(() => win.print(), 350);
+        showToast('已打开打印视图，请在对话框中选择「另存为 PDF」');
+      } catch (e) {
+        showToast(`PDF 导出失败：${e.unreachable ? e.message : escapeHtml(e.message)}`);
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = '导出 PDF（打印）'; }
+      }
+    }
+    // 由研究运行数据生成干净的打印用 HTML（仅表格，无应用外壳，避免 CJK 乱码）
+    function buildPrintHtml(run) {
+      const res = run.result || {};
+      const rep = res.report || {};
+      const rows = buildReportRowsForPrint(run);
+      const company = escapeHtml(res.company || '客户背调报告');
+      const meta = `<div class="meta">状态：${escapeHtml(run.status || '')} · 生成时间：${escapeHtml(res.generatedAt || '')} · 来源：${escapeHtml(res.generatedBy || '')}</div>`;
+      const body = rows.map(([sec, field, val]) =>
+        `<tr><td class="sec">${escapeHtml(sec)}</td><td class="fld">${escapeHtml(field)}</td><td class="val">${escapeHtml(val)}</td></tr>`
+      ).join('');
+      return `<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><title>${company}</title>
+<style>
+  body{font-family:-apple-system,"Segoe UI","Microsoft YaHei","PingFang SC",sans-serif;color:#111;margin:32px;font-size:12px}
+  h1{font-size:20px;margin:0 0 4px}
+  .meta{color:#666;margin-bottom:16px;font-size:11px}
+  table{border-collapse:collapse;width:100%}
+  th,td{border:1px solid #ddd;padding:5px 8px;vertical-align:top;text-align:left}
+  th{background:#f3f4f6}
+  .sec{color:#2563eb;font-weight:600;white-space:nowrap;width:90px}
+  .fld{width:160px;color:#374151}
+  .val{white-space:pre-wrap}
+  @media print{body{margin:12mm}}
+</style></head><body>
+<h1>${company}</h1>${meta}
+<table><thead><tr><th>类型</th><th>字段</th><th>内容</th></tr></thead><tbody>${body}</tbody></table>
+</body></html>`;
+    }
+    // 复用 report-export 的同构提取；前端无该模块时退化为空（理论上不会触发，因为数据来自后端）
+    function buildReportRowsForPrint(run) {
+      // 与后端 buildReportRows 同构的精简版，供打印视图使用
+      const res = run.result || {};
+      const rep = res.report || {};
+      const out = [];
+      out.push(['Meta', 'runId', run.id]);
+      out.push(['Meta', 'company', res.company]);
+      out.push(['Meta', 'country', res.country]);
+      out.push(['Meta', 'industry', res.industry]);
+      out.push(['Meta', 'status', run.status]);
+      out.push(['Meta', 'generatedBy', res.generatedBy]);
+      out.push(['Meta', 'generatedAt', res.generatedAt]);
+      out.push(['Meta', 'confidence', res.confidence]);
+      for (const f of res.facts || []) out.push(['Fact', f.field, `${f.value}${f.sourceUrl ? ` (source: ${f.sourceUrl})` : ''}`]);
+      for (const i of res.inferences || []) out.push(['Inference', i.field, `${i.value}${i.basis ? ` | basis: ${i.basis}` : ''}`]);
+      for (const u of res.unknowns || []) out.push(['Unknown', u.field, u.reason]);
+      for (const o of res.opportunities || []) out.push(['Opportunity', o.signal, `${o.evidence || ''} | strength: ${o.strength || ''}`]);
+      for (const c of res.contacts || []) out.push(['Contact', c.role, `${c.channel}: ${c.value}${c.public ? ' (public)' : ''}`]);
+      const scalars = [['Summary', 'oneLineSummary', rep.oneLineSummary], ['Summary', 'matchScore', rep.matchScore], ['Summary', 'matchSummary', rep.matchSummary], ['Summary', 'businessModel', rep.businessModel], ['Summary', 'recommendedPositioning', rep.recommendedPositioning], ['Summary', 'differentiation', rep.differentiation], ['Summary', 'riskSummary', rep.riskSummary], ['Summary', 'competitiveLandscape', rep.competitiveLandscape]];
+      for (const [sec, f, v] of scalars) if (v != null && v !== '') out.push([sec, f, v]);
+      for (const k of rep.keyPersonnel || []) out.push(['KeyPerson', k.name || '', `${k.title || ''} | ${k.email || ''} | decisionMaker=${Boolean(k.isDecisionMaker)}`]);
+      for (const p of rep.productsServices || []) out.push(['Product', p.name || '', p.detail || '']);
+      for (const r of rep.riskAssessment || []) out.push(['Risk', r.category || '', `${r.level || ''} | ${r.note || ''}`]);
+      for (const e of res.evidence || []) out.push(['Evidence', e.url || '', `${e.tier || ''} | ${e.country || ''} | ${e.summaryEn || ''}`]);
+      return out;
+    }
+    function discovery(tab) {
+      const content = document.getElementById('discovery-content');
+      document.querySelectorAll('.tab-button').forEach(btn => { btn.className = `button ${btn.dataset.tab === tab ? 'primary' : 'secondary'} tab-button`; });
+      if (tab === 'company') content.innerHTML = `<div class="notice"><strong>i</strong><span>单公司研究需要公司名称、国家/地区、官网/域名、目标产品/类别和研究类型。缺失字段不会被静默猜测。</span></div><div style="margin-top:16px"><button class="button primary" data-open="research-modal">填写单公司研究表单</button></div>`;
+      if (tab === 'import') content.innerHTML = `<div class="notice"><strong>⇧</strong><span>导入文件将在创建研究前进行列映射、行数、重复主体和必填字段校验。原型不上传真实文件。</span></div><div style="margin-top:16px;display:flex;gap:10px;align-items:center"><button class="button secondary">选择 CSV / Excel</button><span class="muted">未选择文件</span></div>`;
+      if (tab === 'filter') content.innerHTML = `<div class="toolbar"><select class="select"><option>Norway</option><option>United Kingdom</option><option>Nigeria</option><option>Angola</option><option>Brazil</option></select><select class="select"><option>客户类型</option><option>Oilfield service</option><option>Drilling</option><option>Manufacturer</option></select><select class="select"><option>员工 100+</option><option>项目/采购信号</option><option>财务/经营信号</option></select><button class="button primary">开始条件搜索</button></div><div class="notice"><strong>i</strong><span>条件搜索结果必须先进入候选审阅，区分合格、自动排除、规模未知待复核、重复主体和信息不足。</span></div>`;
+    }
+    // —— 客户背调：研究列表 + 内联报告显示窗口 ——
+    const discoverReports = {};
+    discoverReports['Deep Industries'] = sampleReport; // 示例背调报告（参考版式）
+    function renderDiscoverList() {
+      const el = document.getElementById('discover-list');
+      if (!el) return;
+      if (!tasks.length) { el.innerHTML = '<div class="state-box"><strong>暂无背调研究</strong><span>通过上方「单公司研究」创建，完成后将在此列出并可查看报告。</span></div>'; return; }
+      el.innerHTML = tasks.map(t => `<div class="queue-item" data-discover="${escapeHtml(t.company)}"><strong>${escapeHtml(t.company)}</strong><p>${escapeHtml(t.type)} · ${escapeHtml(t.id)}</p><div class="queue-footer"><span class="pill ${t.tone || 'amber'}">${escapeHtml(t.status)}</span><button class="link" data-discover="${escapeHtml(t.company)}">查看报告</button></div></div>`).join('');
+    }
+    function showDiscoverReport(company) {
+      const rep = discoverReports[company];
+      const meta = document.getElementById('discover-report-meta');
+      const body = document.getElementById('discover-report-body');
+      if (!meta || !body) return;
+      if (rep) {
+        meta.innerHTML = `${pill('客户背调', 'blue')}${pill('已生成', 'green')}${pill('示例数据', 'slate')}`;
+        renderReport(rep, 'discover-report-body');
+      } else {
+        meta.innerHTML = `${pill('客户背调', 'blue')}${pill('待生成', 'amber')}${pill('示例参考', 'slate')}`;
+        renderReport(sampleReport, 'discover-report-body');
+        body.insertAdjacentHTML('afterbegin', `<div class="notice"><strong>i</strong><span>${escapeHtml(company)} 的完整背调报告待研究生成；下方为参考版式（Deep Industries 示例报告）。</span></div>`);
+      }
+    }
+    function openModal(id) { document.getElementById(id).classList.add('open'); document.getElementById('company-name').focus(); }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+    document.addEventListener('click', async (event) => {
+      const mobileMenu = event.target.closest('.mobile-menu'); if (mobileMenu) { toggleMobileMenu(); return; }
+      const nav = event.target.closest('[data-page]'); if (nav) go(nav.dataset.page);
+      const target = event.target.closest('[data-go]'); if (target) go(target.dataset.go);
+      const dossierNav = event.target.closest('.side-list [data-section]'); if (dossierNav) { setDossierSection(dossierNav.dataset.section); return; }
+      const dossierView = event.target.closest('[data-dossier]'); if (dossierView) { currentDossierCompany = dossierView.dataset.dossier; go('dossier'); return; }
+      const followupNav = event.target.closest('[data-followup]'); if (followupNav) { openFollowup(followupNav.dataset.followup); return; }
+      const discView = event.target.closest('[data-discover]'); if (discView) { showDiscoverReport(discView.dataset.discover); return; }
+      const companyAction = event.target.closest('[data-company]'); if (companyAction) {
+        const company = findCompany(companyAction.dataset.company);
+        if (!company) return;
+        if (!company.prospect) {
+          await markProspectApi(companyAction.dataset.id, true);
+          company.prospect = true; company.prospectTone = 'amber';
+          if (!prospects.some(item => item.company === company.company)) prospects.push({ company: company.company, country: company.country, industry: company.industry, priority: 'P2 · 近期培育', priorityTone: 'amber', owner: 'Monk Chen', stage: '待首次接触', next: '完成首次客户研究', updated: '刚刚' });
+          renderCompanies(); renderProspects(); renderPriority(); showToast(`${company.company} 已加入主动开发名单`);
+        } else {
+          currentDossierCompany = company.company;
+          go('dossier'); renderDossierDevStatus(); showToast(`已打开 ${companyAction.dataset.company} 的企业档案`);
+        }
+      }
+      const researchAction = event.target.closest('[data-research-company]'); if (researchAction) {
+        const rec = findCompany(researchAction.dataset.researchCompany);
+        openModal('research-modal');
+        prefillResearchFromRecord(rec || { company: researchAction.dataset.researchCompany });
+        showToast(`已为 ${researchAction.dataset.researchCompany} 自动带出背调信息，可修改后创建`);
+      }
+      const opener = event.target.closest('[data-open]'); if (opener) openModal(opener.dataset.open);
+      const closer = event.target.closest('[data-close]'); if (closer) closeModal(closer.dataset.close);
+      const filter = event.target.closest('.fact-filter'); if (filter) { document.querySelectorAll('.fact-filter').forEach(btn => btn.className = 'button secondary fact-filter'); filter.className = 'button primary fact-filter'; renderFacts(filter.dataset.filter); }
+      const tab = event.target.closest('.tab-button'); if (tab) discovery(tab.dataset.tab);
+      const companiesPage = event.target.closest('#companies'); if (companiesPage && (event.target.matches('.select') || event.target.matches('.search'))) filterCompanies();
+      const dest = (nav && nav.dataset.page) || (target && target.dataset.go);
+      if (dest === 'companies') { loadDatabase(); loadDatabaseStatus(); }
+      if (dest === 'dossier') { renderDossierDevStatus(); }
+    });
+    document.querySelectorAll('#companies .select, #companies .search').forEach(control => control.addEventListener(control.classList.contains('search') ? 'input' : 'change', filterCompanies));
+    const dbRefreshBtn = document.getElementById('db-refresh'); if (dbRefreshBtn) dbRefreshBtn.addEventListener('click', refreshDatabase);
+    const dossierUpdateBtn = document.getElementById('dossier-update'); if (dossierUpdateBtn) dossierUpdateBtn.addEventListener('click', () => { openModal('research-modal'); prefillResearchFromRecord({ company: 'Deep Industries', country: 'Norway', domain: 'deep-industries.example', industry: 'Oilfield service' }); showToast('已为 Deep Industries 预填更新研究'); });
+    const requestEvidenceBtn = document.getElementById('request-evidence'); if (requestEvidenceBtn) requestEvidenceBtn.addEventListener('click', () => showToast('已记录「要求补充证据」，将在报告中标记为待补来源'));
+    document.getElementById('retry-companies').addEventListener('click', () => { document.getElementById('company-error').classList.add('hidden'); loadDatabase(); showToast('正在重新读取企业资料'); });
+    document.getElementById('research-modal').addEventListener('click', e => { if (e.target.id === 'research-modal') closeModal('research-modal'); });
+    document.getElementById('followup-modal').addEventListener('click', e => { if (e.target.id === 'followup-modal') closeModal('followup-modal'); });
+    const followupAddBtn = document.getElementById('followup-add'); if (followupAddBtn) followupAddBtn.addEventListener('click', saveFollowup);
+    const followupOverrideBtn = document.getElementById('followup-override-btn'); if (followupOverrideBtn) followupOverrideBtn.addEventListener('click', overrideStage);
+    // 目标配置弹窗（数据库区域 / 国家 / 客户类型 / 数量 / 频率）
+    renderCfgChecks();
+    const dbConfigBtn = document.getElementById('db-config-btn'); if (dbConfigBtn) dbConfigBtn.addEventListener('click', openDbConfig);
+    const dbConfigSave = document.getElementById('db-config-save'); if (dbConfigSave) dbConfigSave.addEventListener('click', saveDbConfig);
+    document.getElementById('db-config-modal').addEventListener('click', e => { if (e.target.id === 'db-config-modal') closeModal('db-config-modal'); });
+    document.getElementById('cfg-region').addEventListener('change', e => {
+      const region = e.target.value;
+      if (region !== 'custom') {
+        const preset = REGION_COUNTRIES[region] || [];
+        document.querySelectorAll('[data-cfg-country]').forEach(cb => { cb.checked = preset.includes(cb.value); });
+      }
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        closeModal('research-modal');
+        document.querySelector('.sidebar').classList.remove('mobile-open');
+        document.querySelector('.mobile-menu').setAttribute('aria-expanded', 'false');
+      }
+    });
+    document.getElementById('research-form').addEventListener('submit', e => {
+      e.preventDefault();
+      closeModal('research-modal');
+      const payload = {
+        companyName: document.getElementById('company-name').value.trim(),
+        country: document.getElementById('country').value,
+        domain: document.getElementById('domain').value.trim(),
+        product: document.getElementById('product').value.trim(),
+        researchType: document.getElementById('research-type').value,
+        source: 'single'
+      };
+      startResearch(payload);
+    });
+    document.getElementById('approve-report').addEventListener('click', () => { document.getElementById('report-status').textContent = '已审核发布'; document.getElementById('report-status').className = 'pill green'; showToast('原型状态已更新。生产环境会创建审核记录、版本事件和审计日志。'); });
+
+    // 连接后端自动背调：同源相对路径（统一部署下前端由 serve.mjs 同源托管，
+    // 用相对路径避免用 localhost 访问时被 CORS 拒绝；dev 端口分离时改为绝对地址即可）
+    const RESEARCH_API = '';
+    async function startResearch(payload) {
+      let runId;
+      try {
+        const res = await apiFetch(`${RESEARCH_API}/api/customer-research/research-requests`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.error || `HTTP ${res.status}`);
+        }
+        const data = await res.json();
+        runId = data.runId;
+      } catch (err) {
+        showToast(err.unreachable ? err.message : `创建研究失败：${err.message}`);
+        return;
+      }
+      showToast(`已创建 AI 研究任务 ${runId.slice(0, 8)}，DeepSeek 正在调研 ${payload.companyName}…`);
+      pollRun(runId, payload);
+    }
+    function pollRun(runId, payload) {
+      const timer = setInterval(async () => {
+        try {
+          const res = await apiFetch(`${RESEARCH_API}/api/customer-research/research-runs/${runId}`);
+          if (!res.ok) throw new Error('run not found');
+          const run = await res.json();
+          if (run.status === 'PENDING_REVIEW' || run.status === 'COMPLETED') {
+            clearInterval(timer);
+            const r = run.result || {};
+            const facts = (r.facts || []).length;
+            const inferences = (r.inferences || []).length;
+            const unknowns = (r.unknowns || []).length;
+            const opps = (r.opportunities || []).length;
+            tasks.unshift({
+              company: payload.companyName,
+              id: 'RUN-' + runId.slice(0, 8).toUpperCase(),
+              country: r.country || payload.country || '-',
+              type: 'AI 深研',
+              status: '待审核',
+              evidence: `${facts} / ${facts + unknowns}`,
+              expiry: '—',
+              owner: 'DeepSeek V4 Flash',
+              tone: 'amber',
+              live: true
+            });
+            renderTasks();
+            if (r.report) {
+              renderReport(r.report);
+              document.getElementById('report-date').textContent = '截至 ' + (r.generatedAt || new Date().toISOString()).slice(0, 10);
+              discoverReports[payload.companyName] = r.report;
+            }
+            renderDiscoverList();
+            showToast(`AI 研究完成：${payload.companyName} — ${facts} 事实 / ${inferences} 推断 / ${unknowns} 未知 / ${opps} 机会信号。待人工审核。`);
+            go('discover'); showDiscoverReport(payload.companyName);
+          } else if (run.status === 'FAILED') {
+            clearInterval(timer);
+            showToast(`AI 研究失败：${run.error || '未知错误'}。请检查后端密钥或网络后重试。`);
+          }
+        } catch (err) {
+          clearInterval(timer);
+          showToast(`轮询研究状态失败：${err.message}`);
+        }
+      }, 3000);
+    }
+    document.getElementById('export-csv').addEventListener('click', downloadCsv);
+    document.getElementById('export-xlsx').addEventListener('click', downloadXlsx);
+    document.getElementById('export-pdf').addEventListener('click', exportPdf);
+    document.getElementById('add-source').addEventListener('click', () => alert('原型提示：新增来源必须记录国家、许可、可采字段、快照/导出规则和复核日期。'));
+    document.getElementById('switch-diligence').addEventListener('click', () => renderReport(sampleReport));
+    document.getElementById('switch-analysis').addEventListener('click', () => renderReport(sampleReportAnalysis));
+    renderPriority(); loadDatabase(); loadDatabaseStatus(); renderProspects(); renderTasks(); renderFacts(); renderSources(); renderExports(); renderReport(sampleReport); renderDiscoverList(); showDiscoverReport('Deep Industries'); discovery('company');
+    // 深链恢复：若地址栏带 #page 且为合法页面则跳转，否则停留在默认工作台
+    (function restoreDeepLink() {
+      const p = location.hash.slice(1);
+      if (pages[p]) go(p); else go('dashboard');
+    })();
+  </script>
+</body>
+</html>

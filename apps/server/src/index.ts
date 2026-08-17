@@ -20,6 +20,7 @@ import aiGenerateRoutes from './routes/aiGenerate.js';
 import strategyRoutes from './routes/strategy.js';
 import analyticsRoutes from './routes/analytics.js';
 import workbenchRoutes from './routes/workbench.js';
+import customerResearchRoutes from './routes/customerResearch.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -87,6 +88,7 @@ for (const apiRoot of apiRootPaths) {
   app.use(`${apiRoot}/strategy`, strategyRoutes);
   app.use(`${apiRoot}/stats/analytics`, analyticsRoutes);
   app.use(`${apiRoot}/v1`, workbenchRoutes);
+  app.use(`${apiRoot}/customer-research`, customerResearchRoutes);
   app.post(`${apiRoot}/errors/report`, (req, res) => {
     const { message, url } = req.body || {};
     writeAuditLog({ action: 'ai.invoked', traceId: res.locals.traceId, purpose: 'frontend-error-report', result: 'failure', metadata: { message: String(message || '').slice(0, 200), url } });
