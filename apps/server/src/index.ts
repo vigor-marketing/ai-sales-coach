@@ -17,7 +17,6 @@ import trainingRoutes from './routes/training.js';
 import reportRoutes from './routes/reports.js';
 import uploadRoutes from './routes/upload.js';
 import aiGenerateRoutes from './routes/aiGenerate.js';
-import feedbackRoutes from './routes/feedback.js';
 import strategyRoutes from './routes/strategy.js';
 import analyticsRoutes from './routes/analytics.js';
 import workbenchRoutes from './routes/workbench.js';
@@ -85,7 +84,6 @@ for (const apiRoot of apiRootPaths) {
   app.use(`${apiRoot}/reports`, reportRoutes);
   app.use(`${apiRoot}/upload`, uploadRoutes);
   app.use(`${apiRoot}/ai`, aiGenerateRoutes);
-  app.use(`${apiRoot}/feedback`, feedbackRoutes);
   app.use(`${apiRoot}/strategy`, strategyRoutes);
   app.use(`${apiRoot}/stats/analytics`, analyticsRoutes);
   app.use(`${apiRoot}/v1`, workbenchRoutes);

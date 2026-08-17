@@ -187,15 +187,3 @@ model Setting {
   
   @@map("settings")
 }
-
-model Feedback {
-  id        String   @id @default(uuid())
-  userId    String?  @map("user_id")
-  type      String   @default("OTHER") // BUG / FEATURE / IMPROVEMENT / OTHER
-  content   String
-  contact   String?  // 联系方式（可选）
-  status    String   @default("PENDING") // PENDING / REVIEWING / RESOLVED / CLOSED
-  createdAt DateTime @default(now()) @map("created_at")
-  
-  @@map("feedbacks")
-}

@@ -87,7 +87,7 @@ class ErrorBoundary extends Component<{children: React.ReactNode}, {hasError: bo
   }
 }
 import {
-  LayoutDashboard, BookOpen, Users, MessageSquare, FileText, Settings, Menu, X, User, HardHat, Database, MessageCircle, Brain, BarChart3
+  LayoutDashboard, BookOpen, Users, MessageSquare, FileText, Settings, Menu, X, User, HardHat, Database, Brain, BarChart3
 } from 'lucide-react';
 import { useAuthStore } from './stores/authStore';
 import Dashboard from './pages/Dashboard/Dashboard';
@@ -99,10 +99,8 @@ import Reports from './pages/Reports/Reports';
 import ReportDetail from './pages/Reports/ReportDetail';
 import Analytics from './pages/Analytics/Analytics';
 import SettingsPage from './pages/Settings/Settings';
-import FeedbackAdmin from './pages/FeedbackAdmin/FeedbackAdmin';
 import NotFound from './pages/NotFound/NotFound';
 import StrategyInsights from './pages/StrategyInsights/StrategyInsights';
-import FeedbackWidget from './components/FeedbackWidget';
 import ToastContainer from './components/Toast';
 
 function AppContent() {
@@ -122,7 +120,6 @@ function AppContent() {
       '/knowledge': '知识库',
       '/reports': '评估报告',
       '/analytics': '跨会话分析',
-      '/feedback': '反馈管理',
       '/strategy': '策略洞察',
       '/settings': '系统设置',
     };
@@ -148,7 +145,6 @@ function AppContent() {
         { path: '/scenarios', icon: BookOpen, label: '场景管理' },
         { path: '/knowledge', icon: Database, label: '知识库' },
         ...(user?.role === 'ADMIN' ? [
-          { path: '/feedback', icon: MessageCircle, label: '反馈管理' },
           { path: '/strategy', icon: Brain, label: '策略洞察' },
           { path: '/settings', icon: Settings, label: '系统设置' },
         ] : []),
@@ -273,14 +269,12 @@ function AppContent() {
             <Route path="/reports" element={<Reports />} />
             <Route path="/reports/:id" element={<ReportDetail />} />
             <Route path="/analytics" element={<Analytics />} />
-            <Route path="/feedback" element={<FeedbackAdmin />} />
             <Route path="/strategy" element={<StrategyInsights />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </div>
       </main>
-      <FeedbackWidget />
       <ToastContainer />
     </div>
   );
