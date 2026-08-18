@@ -87,7 +87,7 @@ class ErrorBoundary extends Component<{children: React.ReactNode}, {hasError: bo
   }
 }
 import {
-  LayoutDashboard, BookOpen, Users, MessageSquare, FileText, Settings, Menu, X, User, HardHat, Database, Brain, BarChart3
+  LayoutDashboard, BookOpen, Users, MessageSquare, FileText, Menu, X, User, HardHat, Database, Brain, BarChart3
 } from 'lucide-react';
 import { useAuthStore } from './stores/authStore';
 import Dashboard from './pages/Dashboard/Dashboard';
@@ -98,7 +98,6 @@ import TrainingRoom from './pages/TrainingRoom/TrainingRoom';
 import Reports from './pages/Reports/Reports';
 import ReportDetail from './pages/Reports/ReportDetail';
 import Analytics from './pages/Analytics/Analytics';
-import SettingsPage from './pages/Settings/Settings';
 import NotFound from './pages/NotFound/NotFound';
 import StrategyInsights from './pages/StrategyInsights/StrategyInsights';
 import ToastContainer from './components/Toast';
@@ -121,7 +120,6 @@ function AppContent() {
       '/reports': '评估报告',
       '/analytics': '跨会话分析',
       '/strategy': '策略洞察',
-      '/settings': '系统设置',
     };
     const base = 'AI销售陪练';
     const key = Object.keys(titles).find(k => location.pathname === k || location.pathname.startsWith(k + '/'));
@@ -146,7 +144,6 @@ function AppContent() {
         { path: '/knowledge', icon: Database, label: '知识库' },
         ...(user?.role === 'ADMIN' ? [
           { path: '/strategy', icon: Brain, label: '策略洞察' },
-          { path: '/settings', icon: Settings, label: '系统设置' },
         ] : []),
       ],
     },
@@ -270,7 +267,6 @@ function AppContent() {
             <Route path="/reports/:id" element={<ReportDetail />} />
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/strategy" element={<StrategyInsights />} />
-            <Route path="/settings" element={<SettingsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </div>

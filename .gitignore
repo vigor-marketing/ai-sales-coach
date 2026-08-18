@@ -4,6 +4,7 @@ web/dist/
 *.log
 .DS_Store
 .env
+.env.production
 *.db
 *.db-journal
 backups/
