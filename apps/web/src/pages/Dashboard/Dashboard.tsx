@@ -9,7 +9,7 @@ export default function Dashboard() {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const { user } = useAuthStore();
+  const { user, token } = useAuthStore();
   const isAdmin = user?.role === 'ADMIN';
 
   const handleDeleteSession = async (sessionId: string, e: React.MouseEvent) => {
@@ -25,15 +25,16 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
+    if (!token) { setLoading(false); return; }
     fetch(`${API_BASE_PATH}/training/sessions/stats`, {
-      headers: { Authorization: `Bearer ${useAuthStore.getState().token}` }
+      headers: { Authorization: `Bearer ${token}` }
     }).then(r => r.json().catch(() => null)).then(data => {
       if (data && data.totalSessions !== undefined) {
         setStats(data);
       }
       setLoading(false);
     }).catch(() => setLoading(false));
-  }, []);
+  }, [token]);
 
   const scoreColor = (score: number) => {
     if (score >= 80) return 'text-success';
