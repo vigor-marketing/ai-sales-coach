@@ -56,7 +56,7 @@ export const TARGET_INDUSTRIES = [
   'manufacturer'
 ];
 
-// 首期国家
+// 国家白名单（已放开：校验仅作提示，正则接受任意合法国家 / 地区名称，含中文）
 export const TARGET_COUNTRIES = ['Norway', 'UK', 'Nigeria', 'Angola', 'Brazil'];
 
 // 综合匹配度评分维度（参考真实背调报告：产品需求匹配 / 行业相关性 / 采购决策层可触达 / 集团战略价值 / 合作意愿强度）
@@ -89,8 +89,8 @@ export function validateResearchRequest(body) {
   }
 
   const country = typeof body.country === 'string' ? body.country.trim() : '';
-  if (country && !TARGET_COUNTRIES.includes(country) && !/^[A-Za-z\s]{2,}$/.test(country)) {
-    errors.push('country 必须是有效的国家名称');
+  if (country && !TARGET_COUNTRIES.includes(country) && !/^[\p{L}\s.'-]{2,}$/u.test(country)) {
+    errors.push('country 必须是有效的国家 / 地区名称');
   }
 
   const industry = typeof body.industry === 'string' ? body.industry.trim() : '';

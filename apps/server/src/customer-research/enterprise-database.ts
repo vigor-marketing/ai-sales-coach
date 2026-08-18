@@ -21,13 +21,18 @@ const DEFAULT_INTERVAL_SECONDS = Number(process.env.DB_REFRESH_SECONDS || 0) || 
 
 const MAX_CHANGELOG = 50;
 
-// 目标区域 -> 默认国家集合（选择区域时自动预置国家；custom 由用户手动勾选）
+// 目标区域 -> 国家集合（覆盖所有大洲与主要区域；global = 全部国家；custom 由用户手动勾选）
+const ALL_COUNTRIES = ['China','Japan','South Korea','North Korea','Mongolia','India','Pakistan','Bangladesh','Sri Lanka','Nepal','Bhutan','Maldives','Afghanistan','Kazakhstan','Uzbekistan','Turkmenistan','Kyrgyzstan','Tajikistan','Iran','Iraq','Syria','Lebanon','Israel','Jordan','Turkey','Armenia','Azerbaijan','Georgia','Cyprus','Indonesia','Malaysia','Singapore','Thailand','Vietnam','Philippines','Myanmar','Cambodia','Laos','Brunei','Timor-Leste','Hong Kong','Macau','Taiwan','Norway','Sweden','Finland','Denmark','Iceland','Estonia','Latvia','Lithuania','Poland','Germany','Netherlands','Belgium','Luxembourg','France','United Kingdom','Ireland','Portugal','Spain','Andorra','Monaco','Switzerland','Austria','Liechtenstein','Italy','San Marino','Vatican','Czech Republic','Slovakia','Hungary','Slovenia','Croatia','Bosnia and Herzegovina','Serbia','Montenegro','Kosovo','North Macedonia','Albania','Greece','Romania','Bulgaria','Moldova','Ukraine','Belarus','Russia','Egypt','Libya','Tunisia','Algeria','Morocco','Western Sahara','Mauritania','Senegal','Mali','Guinea','Sierra Leone','Liberia','Côte d\'Ivoire','Burkina Faso','Ghana','Togo','Benin','Nigeria','Niger','Chad','Cameroon','Equatorial Guinea','Gabon','Republic of the Congo','Democratic Republic of the Congo','Central African Republic','Sudan','South Sudan','Ethiopia','Eritrea','Djibouti','Somalia','Kenya','Uganda','Tanzania','Rwanda','Burundi','Angola','Zambia','Malawi','Mozambique','Zimbabwe','Botswana','Namibia','South Africa','Lesotho','Eswatini','Madagascar','Comoros','Seychelles','Mauritius','Cape Verde','São Tomé and Príncipe','Gambia','Guinea-Bissau','Canada','United States','Mexico','Greenland','Belize','Guatemala','Honduras','El Salvador','Nicaragua','Costa Rica','Panama','Cuba','Jamaica','Haiti','Dominican Republic','Puerto Rico','Bahamas','Barbados','Trinidad and Tobago','Saint Lucia','Antigua and Barbuda','Grenada','Bermuda','Brazil','Argentina','Chile','Peru','Colombia','Venezuela','Ecuador','Bolivia','Paraguay','Uruguay','Guyana','Suriname','French Guiana','Australia','New Zealand','Papua New Guinea','Fiji','Solomon Islands','Vanuatu','Samoa','Tonga','Kiribati','Tuvalu','Micronesia','Marshall Islands','Palau','Nauru','New Caledonia'];
 const REGION_COUNTRIES = {
-  global: ['Norway', 'United Kingdom', 'Nigeria', 'Angola', 'Brazil'],
-  europe: ['Norway', 'United Kingdom'],
-  africa: ['Nigeria', 'Angola'],
-  south_america: ['Brazil'],
-  asia_pacific: [],
+  global: ALL_COUNTRIES,
+  asia: ['China','Japan','South Korea','North Korea','Mongolia','India','Pakistan','Bangladesh','Sri Lanka','Nepal','Bhutan','Maldives','Afghanistan','Kazakhstan','Uzbekistan','Turkmenistan','Kyrgyzstan','Tajikistan','Iran','Iraq','Syria','Lebanon','Israel','Jordan','Turkey','Armenia','Azerbaijan','Georgia','Cyprus','Indonesia','Malaysia','Singapore','Thailand','Vietnam','Philippines','Myanmar','Cambodia','Laos','Brunei','Timor-Leste','Hong Kong','Macau','Taiwan'],
+  europe: ['Norway','Sweden','Finland','Denmark','Iceland','Estonia','Latvia','Lithuania','Poland','Germany','Netherlands','Belgium','Luxembourg','France','United Kingdom','Ireland','Portugal','Spain','Andorra','Monaco','Switzerland','Austria','Liechtenstein','Italy','San Marino','Vatican','Czech Republic','Slovakia','Hungary','Slovenia','Croatia','Bosnia and Herzegovina','Serbia','Montenegro','Kosovo','North Macedonia','Albania','Greece','Romania','Bulgaria','Moldova','Ukraine','Belarus','Russia'],
+  africa: ['Egypt','Libya','Tunisia','Algeria','Morocco','Western Sahara','Mauritania','Senegal','Mali','Guinea','Sierra Leone','Liberia','Côte d\'Ivoire','Burkina Faso','Ghana','Togo','Benin','Nigeria','Niger','Chad','Cameroon','Equatorial Guinea','Gabon','Republic of the Congo','Democratic Republic of the Congo','Central African Republic','Sudan','South Sudan','Ethiopia','Eritrea','Djibouti','Somalia','Kenya','Uganda','Tanzania','Rwanda','Burundi','Angola','Zambia','Malawi','Mozambique','Zimbabwe','Botswana','Namibia','South Africa','Lesotho','Eswatini','Madagascar','Comoros','Seychelles','Mauritius','Cape Verde','São Tomé and Príncipe','Gambia','Guinea-Bissau'],
+  north_america: ['Canada','United States','Mexico','Greenland','Belize','Guatemala','Honduras','El Salvador','Nicaragua','Costa Rica','Panama','Cuba','Jamaica','Haiti','Dominican Republic','Puerto Rico','Bahamas','Barbados','Trinidad and Tobago','Saint Lucia','Antigua and Barbuda','Grenada','Bermuda'],
+  south_america: ['Brazil','Argentina','Chile','Peru','Colombia','Venezuela','Ecuador','Bolivia','Paraguay','Uruguay','Guyana','Suriname','French Guiana'],
+  oceania: ['Australia','New Zealand','Papua New Guinea','Fiji','Solomon Islands','Vanuatu','Samoa','Tonga','Kiribati','Tuvalu','Micronesia','Marshall Islands','Palau','Nauru','New Caledonia'],
+  middle_east: ['Saudi Arabia','United Arab Emirates','Qatar','Kuwait','Oman','Bahrain','Iraq','Iran','Israel','Jordan','Lebanon','Syria','Yemen','Turkey','Egypt','Palestine'],
+  southeast_asia: ['Indonesia','Malaysia','Singapore','Thailand','Vietnam','Philippines','Myanmar','Cambodia','Laos','Brunei','Timor-Leste'],
   custom: []
 };
 
@@ -332,7 +337,7 @@ export async function setRequirements(partial = {}) {
 export function initEnterpriseDatabase(opts = {}) {
   const loaded = loadJson(DEFAULT_REQUIREMENTS_PATH, null);
   const base = loaded || {
-    requiredCountries: ['Norway', 'United Kingdom', 'Nigeria', 'Angola', 'Brazil'],
+    requiredCountries: ALL_COUNTRIES,
     requiredIndustries: ['Oilfield service', 'Drilling', 'Manufacturer', 'Project contractor', 'EPC'],
     ttlDays: 30
   };

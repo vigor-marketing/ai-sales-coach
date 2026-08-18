@@ -54,7 +54,6 @@
     .topbar { height: 64px; border-bottom: 1px solid var(--line); background: rgba(255,255,255,.94); display: flex; align-items: center; justify-content: space-between; padding: 0 32px; position: sticky; top: 0; z-index: 10; backdrop-filter: blur(10px); }
     .crumb { color: var(--muted); font-size: 12px; }
     .crumb strong { color: #334155; }
-    .top-actions { display: flex; align-items: center; gap: 10px; }
     .icon-button { height: 34px; width: 34px; border: 1px solid var(--line); background: white; border-radius: 8px; color: #475569; }
     .content { max-width: 1480px; margin: 0 auto; padding: 30px 32px 50px; }
     .page { display: none; }
@@ -177,7 +176,7 @@
     @keyframes loading { from { background-position: 200% 0; } to { background-position: -200% 0; } }
     .hidden { display: none !important; }
     @media (max-width: 1100px) { .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } .split { grid-template-columns: 180px minmax(0, 1fr); } .right-panel { grid-column: 1 / -1; grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-    @media (max-width: 780px) { .sidebar { display: none; } .sidebar.mobile-open { display: flex; position: fixed; inset: 0 auto 0 0; width: min(280px, 86vw); height: 100dvh; z-index: 40; box-shadow: 18px 0 42px rgba(15, 23, 42, .18); } .topbar { padding: 0 16px; } .content { padding: 22px 16px 40px; } .mobile-menu { display: inline-flex; } .page-head { flex-direction: column; } .metrics { grid-template-columns: 1fr 1fr; gap: 10px; } .metric { min-height: 112px; padding: 14px; } .layout, .split { display: block; } .layout > *, .split > * { margin-bottom: 14px; } .side-list { display: flex; overflow-x: auto; } .side-list h3 { display: none; } .side-list button { min-width: max-content; border-bottom: 0; border-right: 1px solid #eef2f7; } .right-panel { display: grid; grid-template-columns: 1fr; } .top-actions .button.secondary { display: none; } .report { padding: 24px 20px; } .task-row { grid-template-columns: 1fr auto; } .task-row > :nth-child(2), .task-row > :nth-child(3) { display: none; } }
+    @media (max-width: 780px) { .sidebar { display: none; } .sidebar.mobile-open { display: flex; position: fixed; inset: 0 auto 0 0; width: min(280px, 86vw); height: 100dvh; z-index: 40; box-shadow: 18px 0 42px rgba(15, 23, 42, .18); } .topbar { padding: 0 16px; } .content { padding: 22px 16px 40px; } .mobile-menu { display: inline-flex; } .page-head { flex-direction: column; } .metrics { grid-template-columns: 1fr 1fr; gap: 10px; } .metric { min-height: 112px; padding: 14px; } .layout, .split { display: block; } .layout > *, .split > * { margin-bottom: 14px; } .side-list { display: flex; overflow-x: auto; } .side-list h3 { display: none; } .side-list button { min-width: max-content; border-bottom: 0; border-right: 1px solid #eef2f7; } .right-panel { display: grid; grid-template-columns: 1fr; } .report { padding: 24px 20px; } .task-row { grid-template-columns: 1fr auto; } .task-row > :nth-child(2), .task-row > :nth-child(3) { display: none; } }
     /* 数据库更新状态条 */
     .db-status { display: flex; flex-wrap: wrap; gap: 14px 18px; align-items: center; justify-content: space-between; margin-bottom: 16px; padding: 14px 16px; background: var(--surface-soft); border: 1px solid var(--line); border-radius: var(--radius); }
     .db-status-meta { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: baseline; font-size: 13px; color: var(--muted); }
@@ -205,6 +204,32 @@
     .discover-split { grid-template-columns: minmax(280px, 360px) minmax(0, 1.7fr); align-items: start; }
     #discover-list .queue-item { cursor: pointer; }
     #discover-list .queue-item:hover { box-shadow: 0 0 0 1px #93c5fd inset; }
+
+    /* —— 模块化报告（卡片 + 目录导航） —— */
+    .mod-index { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 18px; }
+    .mod-chip { background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; font-size: 12px; color: #475569; cursor: pointer; font-family: inherit; }
+    .mod-chip:hover { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+    .mod-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .mod { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--surface); }
+    .mod.full { grid-column: 1 / -1; }
+    .mod-head { display: flex; align-items: center; gap: 9px; padding: 11px 14px; background: #f8fafc; border-bottom: 1px solid var(--line); cursor: pointer; user-select: none; }
+    .mod-head h3 { margin: 0; font-size: 13px; font-weight: 700; color: #1e293b; flex: 1; }
+    .mod-ico { width: 24px; height: 24px; border-radius: 7px; background: #eff6ff; color: #1d4ed8; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+    .mod-tag { margin-left: 10px; font-size: 10px; font-weight: 700; color: #a16207; background: #fef3c7; border-radius: 999px; padding: 2px 9px; white-space: nowrap; }
+    .mod-head::after { content: "\2212"; margin-left: 10px; color: #94a3b8; font-weight: 700; font-size: 15px; line-height: 1; }
+    .mod.collapsed .mod-head::after { content: "+"; }
+    .mod.collapsed .mod-body { display: none; }
+    .mod.collapsed .mod-head { border-bottom: 0; }
+    .mod-body { padding: 13px 15px; }
+    .mod-body > :first-child { margin-top: 0; }
+    .mod-body > :last-child { margin-bottom: 0; }
+    .mod-body h4 { font-size: 13px; font-weight: 700; color: #475569; margin: 14px 0 4px; }
+    .mod-body p { color: #475569; line-height: 1.7; font-size: 13px; margin: 0 0 8px; }
+    .mod-body ul, .mod-body ol { color: #475569; line-height: 1.7; font-size: 13px; margin: 0 0 8px; padding-left: 18px; }
+    .mod-body table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .mod-body table th { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); color: #64748b; }
+    .mod-body table td { padding: 7px 10px; border-bottom: 1px solid #eef2f7; }
+    @media (max-width: 780px) { .mod-grid { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
@@ -231,12 +256,12 @@
     </aside>
 
     <main class="main">
-      <header class="topbar"><div><button class="icon-button mobile-menu" aria-label="打开导航" aria-expanded="false" aria-controls="primary-navigation">☰</button><span class="crumb">Vigor 工作台 / <strong id="crumb">工作台</strong></span></div><div class="top-actions"><button class="button secondary" data-go="exports">导出记录</button><button class="button primary" data-open="research-modal">+ 新建研究</button></div></header>
+      <header class="topbar"><div><button class="icon-button mobile-menu" aria-label="打开导航" aria-expanded="false" aria-controls="primary-navigation">☰</button><span class="crumb">Vigor 工作台 / <strong id="crumb">工作台</strong></span></div></header>
       <div class="content">
         <section class="page active" id="dashboard">
           <div class="page-head"><div><h1>研究工作台</h1><p class="lede">查看待处理的客户研究、人工复核与报告审核。所有数据为原型示例，不代表真实客户事实。</p></div><button class="button primary" data-open="research-modal">+ 新建研究</button></div>
           <div class="metrics">
-            <article class="metric"><div class="metric-top"><span class="metric-icon blue">▦</span><span class="pill blue">五国</span></div><div class="metric-value">286</div><span class="metric-label">企业数据库</span></article>
+            <article class="metric"><div class="metric-top"><span class="metric-icon blue">▦</span><span class="pill blue">全球</span></div><div class="metric-value">286</div><span class="metric-label">企业数据库</span></article>
             <article class="metric"><div class="metric-top"><span class="metric-icon amber">☆</span><span class="pill amber">需推进</span></div><div class="metric-value">24</div><span class="metric-label">主动开发名单</span></article>
             <article class="metric"><div class="metric-top"><span class="metric-icon red">!</span><span class="pill red">本周 +6</span></div><div class="metric-value">9</div><span class="metric-label">近期机会信号</span></article>
             <article class="metric"><div class="metric-top"><span class="metric-icon blue">◷</span><span class="pill blue">待处理</span></div><div class="metric-value">12</div><span class="metric-label">待研究任务</span></article>
@@ -277,7 +302,7 @@
             <button class="button secondary" id="db-config-btn">目标配置</button>
           </div>
           <div class="db-changelog hidden" id="db-changelog"></div>
-          <div class="toolbar"><select class="select" aria-label="按国家筛选"><option>全部国家</option><option>Norway</option><option>United Kingdom</option><option>Nigeria</option><option>Angola</option><option>Brazil</option></select><select class="select" aria-label="按行业筛选"><option>全部行业</option><option>Oilfield service</option><option>Drilling</option><option>Manufacturer</option><option>Project contractor</option></select><select class="select" aria-label="按企业规模筛选"><option>全部规模</option><option>规模 100+</option><option>规模未知</option></select><select class="select" aria-label="按资料状态筛选"><option>全部资料状态</option><option>已验证</option><option>需要更新</option><option>尚未研究</option></select><input class="search" aria-label="搜索数据库" placeholder="搜索公司、官网或关键词" /></div>
+          <div class="toolbar"><select class="select" id="db-country-filter" aria-label="按国家筛选"><option>全部国家</option></select><select class="select" aria-label="按行业筛选"><option>全部行业</option><option>Oilfield service</option><option>Drilling</option><option>Manufacturer</option><option>Project contractor</option></select><select class="select" aria-label="按企业规模筛选"><option>全部规模</option><option>规模 100+</option><option>规模未知</option></select><select class="select" aria-label="按资料状态筛选"><option>全部资料状态</option><option>已验证</option><option>需要更新</option><option>尚未研究</option></select><input class="search" aria-label="搜索数据库" placeholder="搜索公司、官网或关键词" /></div>
           <div class="table-wrap"><div class="loading-bar hidden" id="company-loading" aria-label="正在读取企业资料"></div><table><thead><tr><th>企业</th><th>国家</th><th>行业</th><th>规模</th><th>机会信号</th><th>资料状态</th><th>开发状态</th><th></th></tr></thead><tbody id="company-table"></tbody></table></div><div class="state-box hidden" id="company-empty" role="status"><strong>没有匹配的企业</strong><span>调整国家、行业或规模筛选条件后重试。</span></div><div class="state-box hidden" id="company-error" role="alert"><strong>企业资料暂时无法读取</strong><span>原型环境未连接真实数据源，请稍后重试。</span><div style="margin-top:12px"><button class="button secondary" id="retry-companies">重试读取</button></div></div>
         </section>
 
@@ -342,7 +367,7 @@
 
   <div class="modal-backdrop" id="research-modal" role="dialog" aria-modal="true" aria-labelledby="research-modal-title">
     <div class="modal"><div class="modal-head"><div><h2 id="research-modal-title">新建单公司研究</h2><p class="lede">所有必填信息用于实体识别、来源研究与任务路由。</p></div><button class="icon-button" data-close="research-modal" aria-label="关闭新建研究窗口">×</button></div>
-      <form id="research-form"><div class="modal-body"><div class="field"><label for="company-name">公司名称 *</label><input id="company-name" required placeholder="例如：Deep Industries" /></div><div class="field"><label for="country">国家/地区 *</label><select id="country" required><option value="">请选择</option><option>Norway</option><option>United Kingdom</option><option>Nigeria</option><option>Angola</option><option>Brazil</option></select></div><div class="field"><label for="domain">官网或域名 *</label><input id="domain" required placeholder="company.example" /></div><div class="field"><label for="product">目标产品/类别 *</label><input id="product" required placeholder="例如：Well Intervention Tools" /></div><div class="field"><label for="research-type">研究类型 *</label><select id="research-type" required><option>初筛（30 天）</option><option>深研（90 天）</option><option>机会专项（30 天）</option></select></div></div><div class="modal-foot"><button class="button secondary" type="button" data-close="research-modal">取消</button><button class="button primary" type="submit">创建研究任务</button></div></form>
+      <form id="research-form"><div class="modal-body"><div class="field"><label for="company-name">公司名称 *</label><input id="company-name" required placeholder="例如：Deep Industries" /></div><div class="field"><label for="country">国家/地区 *</label><select id="country" required><option value="">请选择</option></select></div><div class="field"><label for="domain">官网或域名 *</label><input id="domain" required placeholder="company.example" /></div><div class="field"><label for="product">目标产品/类别 *</label><input id="product" required placeholder="例如：Well Intervention Tools" /></div><div class="field"><label for="research-type">研究类型 *</label><select id="research-type" required><option>初筛（30 天）</option><option>深研（90 天）</option><option>机会专项（30 天）</option></select></div></div><div class="modal-foot"><button class="button secondary" type="button" data-close="research-modal">取消</button><button class="button primary" type="submit">创建研究任务</button></div></form>
     </div>
   </div>
 
@@ -362,7 +387,7 @@
   <div class="modal-backdrop" id="db-config-modal" role="dialog" aria-modal="true" aria-labelledby="db-config-title">
     <div class="modal"><div class="modal-head"><div><h2 id="db-config-title">数据库目标配置</h2><p class="lede">设定数据库要覆盖的区域、国家、客户类型、目标数量与自动更新频率；保存后立即按新规则刷新并重新调度。</p></div><button class="icon-button" data-close="db-config-modal" aria-label="关闭目标配置">×</button></div>
       <div class="modal-body">
-        <div class="field"><label for="cfg-region">目标区域</label><select id="cfg-region"><option value="global">全球（五国）</option><option value="europe">欧洲（挪威 / 英国）</option><option value="africa">非洲（尼日利亚 / 安哥拉）</option><option value="south_america">南美（巴西）</option><option value="asia_pacific">亚太</option><option value="custom">自定义（手动勾选国家）</option></select></div>
+        <div class="field"><label for="cfg-region">目标区域</label><select id="cfg-region"><option value="global">全球（所有国家）</option><option value="asia">亚洲</option><option value="europe">欧洲</option><option value="africa">非洲</option><option value="north_america">北美洲</option><option value="south_america">南美洲</option><option value="oceania">大洋洲</option><option value="middle_east">中东</option><option value="southeast_asia">东南亚</option><option value="custom">自定义（手动勾选国家）</option></select></div>
         <div class="field"><label>目标国家<span class="muted">（选择区域自动预置，也可手动勾选）</span></label><div class="check-grid" id="cfg-countries"></div></div>
         <div class="field"><label>目标客户类型<span class="muted">（可多选）</span></label><div class="check-grid" id="cfg-types"></div></div>
         <div class="field"><label for="cfg-count">目标数量（纳入企业上限）</label><input id="cfg-count" type="number" min="1" max="500" value="50" /></div>
@@ -372,7 +397,48 @@
     </div>
   </div>
 
-  <script>
+    <script>
+    // —— 全量国家 / 区域数据集：覆盖所有大洲与主要区域（中国港澳台合规标注为 China 的一部分）——
+    const COUNTRY_REGIONS = {
+      '亚洲': [['China','中国'],['Japan','日本'],['South Korea','韩国'],['North Korea','朝鲜'],['Mongolia','蒙古'],['India','印度'],['Pakistan','巴基斯坦'],['Bangladesh','孟加拉国'],['Sri Lanka','斯里兰卡'],['Nepal','尼泊尔'],['Bhutan','不丹'],['Maldives','马尔代夫'],['Afghanistan','阿富汗'],['Kazakhstan','哈萨克斯坦'],['Uzbekistan','乌兹别克斯坦'],['Turkmenistan','土库曼斯坦'],['Kyrgyzstan','吉尔吉斯斯坦'],['Tajikistan','塔吉克斯坦'],['Iran','伊朗'],['Iraq','伊拉克'],['Syria','叙利亚'],['Lebanon','黎巴嫩'],['Israel','以色列'],['Jordan','约旦'],['Turkey','土耳其'],['Armenia','亚美尼亚'],['Azerbaijan','阿塞拜疆'],['Georgia','格鲁吉亚'],['Cyprus','塞浦路斯'],['Indonesia','印度尼西亚'],['Malaysia','马来西亚'],['Singapore','新加坡'],['Thailand','泰国'],['Vietnam','越南'],['Philippines','菲律宾'],['Myanmar','缅甸'],['Cambodia','柬埔寨'],['Laos','老挝'],['Brunei','文莱'],['Timor-Leste','东帝汶'],['Hong Kong','中国香港 (Hong Kong, China)'],['Macau','中国澳门 (Macau, China)'],['Taiwan','中国台湾 (Taiwan, China)']],
+      '欧洲': [['Norway','挪威'],['Sweden','瑞典'],['Finland','芬兰'],['Denmark','丹麦'],['Iceland','冰岛'],['Estonia','爱沙尼亚'],['Latvia','拉脱维亚'],['Lithuania','立陶宛'],['Poland','波兰'],['Germany','德国'],['Netherlands','荷兰'],['Belgium','比利时'],['Luxembourg','卢森堡'],['France','法国'],['United Kingdom','英国'],['Ireland','爱尔兰'],['Portugal','葡萄牙'],['Spain','西班牙'],['Andorra','安道尔'],['Monaco','摩纳哥'],['Switzerland','瑞士'],['Austria','奥地利'],['Liechtenstein','列支敦士登'],['Italy','意大利'],['San Marino','圣马力诺'],['Vatican','梵蒂冈'],['Czech Republic','捷克'],['Slovakia','斯洛伐克'],['Hungary','匈牙利'],['Slovenia','斯洛文尼亚'],['Croatia','克罗地亚'],['Bosnia and Herzegovina','波斯尼亚和黑塞哥维那'],['Serbia','塞尔维亚'],['Montenegro','黑山'],['Kosovo','科索沃'],['North Macedonia','北马其顿'],['Albania','阿尔巴尼亚'],['Greece','希腊'],['Romania','罗马尼亚'],['Bulgaria','保加利亚'],['Moldova','摩尔多瓦'],['Ukraine','乌克兰'],['Belarus','白俄罗斯'],['Russia','俄罗斯']],
+      '非洲': [['Egypt','埃及'],['Libya','利比亚'],['Tunisia','突尼斯'],['Algeria','阿尔及利亚'],['Morocco','摩洛哥'],['Western Sahara','西撒哈拉'],['Mauritania','毛里塔尼亚'],['Senegal','塞内加尔'],['Mali','马里'],['Guinea','几内亚'],['Sierra Leone','塞拉利昂'],['Liberia','利比里亚'],['Côte d\'Ivoire','科特迪瓦'],['Burkina Faso','布基纳法索'],['Ghana','加纳'],['Togo','多哥'],['Benin','贝宁'],['Nigeria','尼日利亚'],['Niger','尼日尔'],['Chad','乍得'],['Cameroon','喀麦隆'],['Equatorial Guinea','赤道几内亚'],['Gabon','加蓬'],['Republic of the Congo','刚果（布）'],['Democratic Republic of the Congo','刚果（金）'],['Central African Republic','中非'],['Sudan','苏丹'],['South Sudan','南苏丹'],['Ethiopia','埃塞俄比亚'],['Eritrea','厄立特里亚'],['Djibouti','吉布提'],['Somalia','索马里'],['Kenya','肯尼亚'],['Uganda','乌干达'],['Tanzania','坦桑尼亚'],['Rwanda','卢旺达'],['Burundi','布隆迪'],['Angola','安哥拉'],['Zambia','赞比亚'],['Malawi','马拉维'],['Mozambique','莫桑比克'],['Zimbabwe','津巴布韦'],['Botswana','博茨瓦纳'],['Namibia','纳米比亚'],['South Africa','南非'],['Lesotho','莱索托'],['Eswatini','斯威士兰'],['Madagascar','马达加斯加'],['Comoros','科摩罗'],['Seychelles','塞舌尔'],['Mauritius','毛里求斯'],['Cape Verde','佛得角'],['São Tomé and Príncipe','圣多美和普林西比'],['Gambia','冈比亚'],['Guinea-Bissau','几内亚比绍']],
+      '北美洲': [['Canada','加拿大'],['United States','美国'],['Mexico','墨西哥'],['Greenland','格陵兰'],['Belize','伯利兹'],['Guatemala','危地马拉'],['Honduras','洪都拉斯'],['El Salvador','萨尔瓦多'],['Nicaragua','尼卡拉瓜'],['Costa Rica','哥斯达黎加'],['Panama','巴拿马'],['Cuba','古巴'],['Jamaica','牙买加'],['Haiti','海地'],['Dominican Republic','多米尼加'],['Puerto Rico','波多黎各'],['Bahamas','巴哈马'],['Barbados','巴巴多斯'],['Trinidad and Tobago','特立尼达和多巴哥'],['Saint Lucia','圣卢西亚'],['Antigua and Barbuda','安提瓜和巴布达'],['Grenada','格林纳达'],['Bermuda','百慕大']],
+      '南美洲': [['Brazil','巴西'],['Argentina','阿根廷'],['Chile','智利'],['Peru','秘鲁'],['Colombia','哥伦比亚'],['Venezuela','委内瑞拉'],['Ecuador','厄瓜多尔'],['Bolivia','玻利维亚'],['Paraguay','巴拉圭'],['Uruguay','乌拉圭'],['Guyana','圭亚那'],['Suriname','苏里南'],['French Guiana','法属圭亚那']],
+      '大洋洲': [['Australia','澳大利亚'],['New Zealand','新西兰'],['Papua New Guinea','巴布亚新几内亚'],['Fiji','斐济'],['Solomon Islands','所罗门群岛'],['Vanuatu','瓦努阿图'],['Samoa','萨摩亚'],['Tonga','汤加'],['Kiribati','基里巴斯'],['Tuvalu','图瓦卢'],['Micronesia','密克罗尼西亚'],['Marshall Islands','马绍尔群岛'],['Palau','帕劳'],['Nauru','瑙鲁'],['New Caledonia','新喀里多尼亚']]
+    };
+    const SUBREGIONS = {
+      '中东': [['Saudi Arabia','沙特阿拉伯'],['United Arab Emirates','阿联酋'],['Qatar','卡塔尔'],['Kuwait','科威特'],['Oman','阿曼'],['Bahrain','巴林'],['Iraq','伊拉克'],['Iran','伊朗'],['Israel','以色列'],['Jordan','约旦'],['Lebanon','黎巴嫩'],['Syria','叙利亚'],['Yemen','也门'],['Turkey','土耳其'],['Egypt','埃及'],['Palestine','巴勒斯坦']],
+      '东南亚': [['Indonesia','印度尼西亚'],['Malaysia','马来西亚'],['Singapore','新加坡'],['Thailand','泰国'],['Vietnam','越南'],['Philippines','菲律宾'],['Myanmar','缅甸'],['Cambodia','柬埔寨'],['Laos','老挝'],['Brunei','文莱'],['Timor-Leste','东帝汶']]
+    };
+    const ALL_COUNTRIES = [];
+    Object.values(COUNTRY_REGIONS).forEach(list => list.forEach(([en]) => { if (!ALL_COUNTRIES.includes(en)) ALL_COUNTRIES.push(en); }));
+    const REGION_LABEL = { global: '全球', asia: '亚洲', europe: '欧洲', africa: '非洲', north_america: '北美洲', south_america: '南美洲', oceania: '大洋洲', middle_east: '中东', southeast_asia: '东南亚', custom: '自定义' };
+    const REGION_COUNTRIES = {
+      global: ALL_COUNTRIES.slice(),
+      asia: COUNTRY_REGIONS['亚洲'].map(([e]) => e),
+      europe: COUNTRY_REGIONS['欧洲'].map(([e]) => e),
+      africa: COUNTRY_REGIONS['非洲'].map(([e]) => e),
+      north_america: COUNTRY_REGIONS['北美洲'].map(([e]) => e),
+      south_america: COUNTRY_REGIONS['南美洲'].map(([e]) => e),
+      oceania: COUNTRY_REGIONS['大洋洲'].map(([e]) => e),
+      middle_east: SUBREGIONS['中东'].map(([e]) => e),
+      southeast_asia: SUBREGIONS['东南亚'].map(([e]) => e),
+      custom: []
+    };
+    const CFG_COUNTRIES = ALL_COUNTRIES.slice();
+    function renderCountrySelect(sel, withAll) {
+      if (!sel) return;
+      const groups = Object.entries(COUNTRY_REGIONS).map(([region, list]) =>
+        `<optgroup label="${region}">${list.map(([en, zh]) => `<option value="${en}">${escapeHtml(zh)}</option>`).join('')}</optgroup>`
+      ).join('');
+      sel.innerHTML = `<option value="">${withAll ? '全部国家' : '请选择'}</option>${groups}`;
+    }
+    function renderCountryFilter(sel) {
+      if (!sel) return;
+      const opts = ALL_COUNTRIES.map(en => `<option>${escapeHtml(en)}</option>`).join('');
+      sel.insertAdjacentHTML('beforeend', opts);
+    }
     const pages = { dashboard: '工作台', discover: '客户背调', companies: '数据库', prospects: '主动开发名单', tasks: '研究任务', dossier: '客户档案', reports: '报告审核', sources: '来源策略', exports: '导出记录' };
     const companies = [
       { company: 'Deep Industries', country: 'Norway', industry: 'Oilfield service', size: '100–250', signal: '项目扩张', signalTone: 'red', profile: '已验证', profileTone: 'green', prospect: '已加入', prospectTone: 'amber' },
@@ -416,6 +482,19 @@
       { company: 'Nordic Field Manufacturing', id: 'RES-2026-0132', country: 'Norway', type: '初筛', status: '已发布', evidence: '7 / 7', expiry: '2026-09-02', owner: 'Monk Chen', tone: 'green' },
       { company: 'Brazil Well Systems', id: 'RES-2026-0128', country: 'Brazil', type: '深研', status: '已过期', evidence: '6 / 10', expiry: '2026-08-01', owner: 'Research Queue', tone: 'red' }
     ];
+    // 真实后端运行（本次会话创建或从磁盘加载的历史），用于"研究任务"页与"客户背调"列表持久展示
+    const liveRuns = [];
+    function runStatusInfo(s) {
+      switch (s) {
+        case 'QUEUED': return { label: '排队中', tone: 'slate' };
+        case 'RUNNING': return { label: '调研中', tone: 'blue' };
+        case 'PENDING_REVIEW': return { label: '待审核', tone: 'amber' };
+        case 'COMPLETED': return { label: '已完成', tone: 'green' };
+        case 'FAILED': return { label: '失败', tone: 'red' };
+        default: return { label: s || '未知', tone: 'slate' };
+      }
+    }
+    function canViewRun(run) { return run && (run.status === 'PENDING_REVIEW' || run.status === 'COMPLETED') && run.result && run.result.report; }
     const facts = [
       { type: 'fact', label: '已验证事实', title: 'Entity and official website context', text: 'The entity name and website context are shown as prototype evidence items. Publication requires the reviewer to confirm the approved source record.', source: 'Approved public source · English', time: 'Retrieved 2026-08-12', tone: 'green' },
       { type: 'fact', label: '已验证事实', title: 'Norwegian-language evidence retained with translation', text: 'A source excerpt is preserved in its original language with a separately labeled English summary. The translated summary does not replace the source record.', source: 'Official source · Norwegian + English summary', time: 'Retrieved 2026-08-12', tone: 'green' },
@@ -593,8 +672,6 @@
         .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
-    // 统一后端请求封装：网络层失败（后端未启动 / 跨域被拒）时抛出带清晰中文说明的错误，
-    // 由调用方统一 toast，避免每处重复且不一致的错误处理。
     // 鉴权：iframe 与工作台同源，从 zustand persist(localStorage key='auth-storage') 读取 JWT，
     // 注入 Authorization 头，复用工作台 authMiddleware（HS256 / 同一 JWT_SECRET）。
     function getWorkbenchToken() {
@@ -605,6 +682,8 @@
         return parsed && parsed.state && parsed.state.token ? parsed.state.token : null;
       } catch (e) { return null; }
     }
+    // 统一后端请求封装：网络层失败（后端未启动 / 跨域被拒）时抛出带清晰中文说明的错误，
+    // 由调用方统一 toast，避免每处重复且不一致的错误处理。
     async function apiFetch(url, opts = {}) {
       const token = getWorkbenchToken();
       const headers = Object.assign({}, opts.headers || {});
@@ -645,8 +724,9 @@
       // 同步地址栏 hash，使刷新 / 深链可恢复当前页面（replaceState 不污染历史栈）
       if (location.hash.slice(1) !== page) history.replaceState(null, '', '#' + page);
       if (page === 'dossier') renderDossier(currentDossierCompany);
+      // 进入报告审核 / 导出记录时刷新数据与选择器，确保刚完成的研究可被审核、可被导出
       if (page === 'reports') loadReviewRuns();
-      if (page === 'exports') { loadExportAudit(); loadExportRuns(); }
+      if (page === 'exports') renderExports();
     }
     // 深链：刷新或带 #page 直接进入时恢复对应页面
     window.addEventListener('hashchange', () => {
@@ -775,7 +855,7 @@
       if (!rec) return;
       const set = (id, v) => { const el = document.getElementById(id); if (el) el.value = (v == null ? '' : String(v)); };
       set('company-name', rec.company);
-      set('country', rec.country);          // 与表单国家下拉项一致（5 国白名单）
+      set('country', rec.country);          // 与表单国家下拉项一致（全量国家）
       set('domain', rec.domain);            // 数据库记录的官方域名
       set('product', rec.industry);         // 目标产品/类别默认带出行业，用户改为具体 VIGOR 产品
       // 研究类型按资料状态（准入规则）给出默认建议，用户可改
@@ -806,19 +886,9 @@
       }
     }
     // —— 数据库目标配置（区域 / 国家 / 客户类型 / 数量 / 频率）——
-    const CFG_COUNTRIES = ['Norway', 'United Kingdom', 'Nigeria', 'Angola', 'Brazil'];
     const CFG_TYPES = ['Oilfield service', 'Drilling', 'Manufacturer', 'Project contractor', 'EPC'];
-    const REGION_LABEL = { global: '全球', europe: '欧洲', africa: '非洲', south_america: '南美', asia_pacific: '亚太', custom: '自定义' };
     const FREQ_LABEL = { daily: '日', weekly: '周', monthly: '30 天', manual: '手动' };
-    // 区域 -> 国家预设（与后端一致；选区域即换国家）
-    const REGION_COUNTRIES = {
-      global: ['Norway', 'United Kingdom', 'Nigeria', 'Angola', 'Brazil'],
-      europe: ['Norway', 'United Kingdom'],
-      africa: ['Nigeria', 'Angola'],
-      south_america: ['Brazil'],
-      asia_pacific: [],
-      custom: []
-    };
+    // 区域 -> 国家预设见顶部 COUNTRY_REGIONS / REGION_COUNTRIES（已覆盖全量大洲+区域）
     let dbConfig = null; // 当前数据库目标配置（来自 /api/customer-research/database/status.requirements）
 
     async function loadDatabaseStatus() {
@@ -926,10 +996,7 @@
         ['股权 / 实控', p.ownership],
         ['管理层', p.management],
         ['员工规模', p.employeeSize != null ? `${p.employeeSize} 人` : (p.employeeSizeNote || '未知')],
-        ['资质 / 上市', p.certifications],
-        ['官网', p.website],
-        ['通用邮箱', p.generalEmail],
-        ['技术联系人', p.technicalContact]
+        ['资质 / 上市', p.certifications]
       ]);
       const reg = r.registry || {};
       const regRows = kvRows([
@@ -960,9 +1027,9 @@
       const finRows = (fin.table || []).map(f => `<tr><td>${escapeHtml(f.metric || '—')}</td><td>${escapeHtml(f.period1 || '—')}</td><td>${escapeHtml(f.period2 || '—')}</td><td>${escapeHtml(f.growth || '—')}</td></tr>`).join('');
       const stratRows = (r.strategyOutlook || []).map(x => `<li><strong>${escapeHtml(x.theme || '')}</strong> — ${escapeHtml(x.detail || '')}</li>`).join('');
 
-      // —— 多模型交叉验证面板 ——
+      // —— 多模型交叉验证内容（仅内容，外壳由模块卡片提供）——
       const cv = r.crossValidation;
-      let cvHtml = '';
+      let cvInner = '';
       if (cv) {
         if (cv.mode === 'dual') {
           const rate = Math.round((cv.agreementRate || 0) * 100);
@@ -970,9 +1037,7 @@
           const confTone = conf === 'high' ? 'green' : conf === 'medium' ? 'amber' : 'slate';
           const conflictItems = (cv.conflicts || []).map(c => `<li><strong>${escapeHtml(c.field)}</strong>：模型A「${escapeHtml(c.valueA)}」 ↔ 模型B「${escapeHtml(c.valueB)}」</li>`).join('');
           const singleItems = (cv.singleSource || []).map(s => `<li><strong>${escapeHtml(s.field)}</strong>：仅 ${escapeHtml(s.provider)} 提供「${escapeHtml(s.value)}」</li>`).join('');
-          cvHtml = `
-        <h2>多模型交叉验证</h2>
-        <div class="cv-box">
+          cvInner = `
           <div class="cv-top"><span class="pill green">已启用双模型互验</span><span class="cv-providers">参与模型：${escapeHtml((cv.providers || []).join(' + '))}</span></div>
           <div class="cv-meta">
             <div><span class="cv-num">${rate}%</span><label>字段一致率</label></div>
@@ -981,96 +1046,147 @@
             <div><span class="cv-num">${cv.singleSourceCount || 0}</span><label>单源待核</label></div>
             <div><span class="cv-num">${pill(escapeHtml(conf), confTone)}</span><label>交叉验证置信</label></div>
           </div>
-          ${conflictItems ? `<h3 class="cv-sub">冲突清单（需人工复核）</h3><ul class="cv-list">${conflictItems}</ul>` : ''}
-          ${singleItems ? `<h3 class="cv-sub">单源信息（仅一方提供，待核）</h3><ul class="cv-list">${singleItems}</ul>` : ''}
-          ${!conflictItems && !singleItems ? '<p class="muted">两模型在可比字段上完全一致，无冲突与单源项。</p>' : ''}
-        </div>`;
+          ${conflictItems ? `<h4 class="cv-sub">冲突清单（需人工复核）</h4><ul class="cv-list">${conflictItems}</ul>` : ''}
+          ${singleItems ? `<h4 class="cv-sub">单源信息（仅一方提供，待核）</h4><ul class="cv-list">${singleItems}</ul>` : ''}
+          ${!conflictItems && !singleItems ? '<p class="muted">两模型在可比字段上完全一致，无冲突与单源项。</p>' : ''}`;
         } else {
-          cvHtml = `
-        <h2>多模型交叉验证</h2>
-        <div class="cv-box">
-          <div class="cv-top"><span class="pill slate">单模型模式</span><span>${escapeHtml(cv.note || '未启用交叉验证')}</span></div>
-        </div>`;
+          cvInner = `<div class="cv-top"><span class="pill slate">单模型模式</span><span>${escapeHtml(cv.note || '未启用交叉验证')}</span></div>`;
         }
       }
 
-      let html = `
+      // —— 组装模块化报告（模块数组驱动，自动跳过空模块）——
+      const modules = [];
+      const mod = (id, icon, title, bodyHtml, opts) => {
+        opts = opts || {};
+        const text = String(bodyHtml || '').replace(/<[^>]*>/g, '').replace(/&[a-zA-Z]+;/g, '').replace(/[—−]/g, '').trim();
+        if (!text && !opts.always) return;
+        modules.push({ id: id, icon: icon, title: title, tag: opts.tag || '', full: !!opts.full, bodyHtml: bodyHtml });
+      };
+
+      mod('match', '分', '综合匹配度', `<div class="dims">${dims || ''}</div>${r.matchSummary ? `<p style="margin-top:10px">${escapeHtml(r.matchSummary)}</p>` : ''}`, { tag: '5 维度' });
+      mod('profile', '像', '公司画像', `<table class="profile-table"><tbody>${profRows}</tbody></table>`);
+
+      if (isDD) {
+        const regBody = `<table class="profile-table"><tbody>${regRows}</tbody></table>${r.websiteVerification ? `<h4>官网内容核验</h4><p>${escapeHtml(r.websiteVerification)}</p>` : ''}${discRows ? `<h4>官网信息与官方登记差异说明</h4><div class="table-wrap"><table><thead><tr><th>官网信息</th><th>官方登记 / 第三方记录</th><th>差异说明</th></tr></thead><tbody>${discRows}</tbody></table></div>` : ''}`;
+        mod('registry', '登', '工商登记核验', regBody, { full: true });
+        const legalBody = `${lc.litigation ? `<p><strong>诉讼情况：</strong>${escapeHtml(lc.litigation)}</p>` : ''}${lc.administrativePenalty ? `<p><strong>行政处罚 / 检查：</strong>${escapeHtml(lc.administrativePenalty)}</p>` : ''}${lc.sanctions ? `<p><strong>制裁 / 黑名单：</strong>${escapeHtml(lc.sanctions)}</p>` : ''}${litRows ? `<div class="table-wrap" style="margin-top:8px"><table><thead><tr><th>案件 / 处罚名称</th><th>法院 / 机构</th><th>日期</th><th>摘要</th><th>来源链接</th></tr></thead><tbody>${litRows}</tbody></table></div>` : ''}`;
+        mod('legal', '法', '法律与合规', legalBody, { full: true });
+        const repBody = `${rep.news ? `<p><strong>新闻报道：</strong>${escapeHtml(rep.news)}</p>` : ''}${rep.industryReview ? `<p><strong>行业评价：</strong>${escapeHtml(rep.industryReview)}</p>` : ''}${rep.customerReview ? `<p><strong>客户评价：</strong>${escapeHtml(rep.customerReview)}</p>` : ''}${rep.employeeReview ? `<p><strong>员工评价：</strong>${escapeHtml(rep.employeeReview)}</p>` : ''}${rep.social ? `<p><strong>社交媒体 / 论坛：</strong>${escapeHtml(rep.social)}</p>` : ''}`;
+        mod('reputation', '评', '媒体与口碑', repBody, { full: true });
+        const riskBody = `${riskRows ? `<div class="table-wrap"><table><thead><tr><th>风险类别</th><th>等级</th><th>说明</th></tr></thead><tbody>${riskRows}</tbody></table></div>` : ''}${r.verificationChecklist && r.verificationChecklist.length ? `<h4>结论与建议 · 核实清单</h4><ol>${r.verificationChecklist.map(x => `<li>${escapeHtml(x)}</li>`).join('')}</ol>` : ''}`;
+        mod('risk', '险', '风险评估', riskBody, { full: true });
+      } else {
+        mod('products', '品', '主要产品与服务', psRows ? `<div class="table-wrap"><table><thead><tr><th>业务板块</th><th>说明</th></tr></thead><tbody>${psRows}</tbody></table></div>` : '', { full: true });
+        const custBody = `${cust.overview ? `<p>${escapeHtml(cust.overview)}</p>` : ''}${contractRows ? `<div class="table-wrap" style="margin-top:8px"><table><thead><tr><th>项目 / 合同</th><th>客户</th><th>合同金额</th><th>期限</th><th>说明</th></tr></thead><tbody>${contractRows}</tbody></table></div>` : ''}`;
+        mod('customers', '客', '主要客户分析', custBody, { full: true });
+        const supBody = `${sup.overview ? `<p>${escapeHtml(sup.overview)}</p>` : ''}${supRows ? `<div class="table-wrap" style="margin-top:8px"><table><thead><tr><th>供应商 / 来源</th><th>供应品类</th><th>说明</th></tr></thead><tbody>${supRows}</tbody></table></div>` : ''}${subRows ? `<h4>子公司内部供应链</h4><div class="table-wrap"><table><thead><tr><th>子公司</th><th>关系</th><th>主要交易内容</th></tr></thead><tbody>${subRows}</tbody></table></div>` : ''}`;
+        mod('suppliers', '供', '供应商与供应链', supBody, { full: true });
+        const finBody = `${fin.narrative ? `<p>${escapeHtml(fin.narrative)}</p>` : ''}${finRows ? `<div class="table-wrap" style="margin-top:8px"><table><thead><tr><th>财务指标</th><th>期间 1</th><th>期间 2</th><th>同比增长</th></tr></thead><tbody>${finRows}</tbody></table></div>` : ''}`;
+        mod('financials', '财', '财务与运营概况', finBody, { full: true });
+        mod('strategy', '略', '战略方向与发展前景', stratRows ? `<ul>${stratRows}</ul>` : '', { full: true });
+      }
+
+      const strengthItems = (r.strengths || []).map(s => `<li>${escapeHtml(s)}</li>`).join('');
+      const omRows = (r.operationalMetrics || []).map(m => `<tr><td>${escapeHtml(m.metric || '—')}</td><td>${escapeHtml(m.value || '—')}</td><td>${escapeHtml(m.note || '')}</td></tr>`).join('');
+      const soBody = `${strengthItems ? `<h4>核心优势</h4><ul>${strengthItems}</ul>` : ''}${omRows ? `<h4>关键运营指标</h4><div class="table-wrap"><table><thead><tr><th>指标</th><th>数值</th><th>说明</th></tr></thead><tbody>${omRows}</tbody></table></div>` : ''}${r.riskSummary ? `<h4>潜在风险汇总</h4><p>${escapeHtml(r.riskSummary)}</p>` : ''}`;
+      mod('strengths', '优', '核心优势与运营指标', soBody, { full: true });
+
+      const bizBody = `<p>${escapeHtml(r.businessModel || '—')}</p><h4>收入来源</h4>${list(r.revenueStreams)}<h4>发展里程碑</h4>${list(r.milestones)}<h4>业务 / 产品服务线</h4>${list(r.businessLines)}`;
+      if (r.businessModel || (r.revenueStreams && r.revenueStreams.length) || (r.milestones && r.milestones.length) || (r.businessLines && r.businessLines.length)) {
+        mod('business', '营', '经营情况', bizBody, { full: true });
+      }
+      mod('whitespace', '隙', '白空间隙映射（VIGOR 产品切入）', ws ? `<ul>${ws}</ul>` : '', { tag: 'VIGOR 切入' });
+      mod('positioning', '位', '推荐定位', (r.recommendedPositioning || r.differentiation) ? `<p>${escapeHtml(r.recommendedPositioning || '—')}${r.differentiation ? ` · ${escapeHtml(r.differentiation)}` : ''}</p>` : '');
+      const contactChannels = kvRows([
+        ['官网', p.website],
+        ['通用邮箱', p.generalEmail],
+        ['技术联系人', p.technicalContact],
+        ['注册地址', reg.registeredAddress]
+      ]);
+      const pubContacts = (r.contacts || []).map(c => `<tr><td>${escapeHtml(c.role || '—')}</td><td>${escapeHtml(c.channel || '—')}</td><td>${escapeHtml(c.value || '—')}</td><td>${c.public ? '<span class="pill green">公开</span>' : '<span class="pill slate">待核</span>'}</td></tr>`).join('');
+      const contactBody = `<table class="profile-table"><tbody>${contactChannels}</tbody></table>${kp ? `<h4>关键联系人</h4><table class="profile-table"><thead><tr><th>姓名</th><th>职位</th><th>联系方式</th><th>类型</th></tr></thead><tbody>${kp}</tbody></table>` : ''}${pubContacts ? `<h4>公开职业联系入口</h4><table class="profile-table"><thead><tr><th>角色</th><th>渠道</th><th>值</th><th>状态</th></tr></thead><tbody>${pubContacts}</tbody></table>` : ''}<p class="muted" style="margin-top:8px">以上为公开信息示例，发布前需复核来源记录与核实日期。</p>`;
+      mod('contactinfo', '联', '联系信息', contactBody, { full: true, always: true });
+      mod('nextsteps', '步', '下一步建议', steps ? `<ol>${steps}</ol>` : '');
+      if (r.competitiveLandscape) mod('competitive', '竞', '竞争格局', `<p>${escapeHtml(r.competitiveLandscape)}</p>`, { full: true });
+      if (cvInner) mod('crossval', '验', '多模型交叉验证', `<div class="cv-box">${cvInner}</div>`, { full: true, tag: (cv && cv.mode === 'dual') ? '双模型' : '单模型' });
+
+      const idxHtml = modules.length ? `<div class="mod-index">${modules.map(m => `<button type="button" class="mod-chip" data-mod="${m.id}">${escapeHtml(m.title)}</button>`).join('')}</div>` : '';
+      const gridHtml = modules.length ? `<div class="mod-grid">${modules.map(m => `<section class="mod${m.full ? ' full' : ''}" id="mod-${m.id}"><header class="mod-head"><span class="mod-ico">${escapeHtml(m.icon)}</span><h3>${escapeHtml(m.title)}</h3>${m.tag ? `<span class="mod-tag">${escapeHtml(m.tag)}</span>` : ''}</header><div class="mod-body">${m.bodyHtml}</div></section>`).join('')}</div>` : '<p class="muted">报告暂无可用模块内容。</p>';
+
+      body.innerHTML = `
         <h1>${escapeHtml(p.fullName || '未知公司')} | ${escapeHtml(typeLabel)}</h1>
         <p class="lede">${escapeHtml(r.perspective || '')} · 综合匹配度 <strong>${escapeHtml(String(score))}/10</strong> · 数据来源：${escapeHtml((r.dataSources || []).join('、') || '—')}</p>
         <div class="report-summary"><strong>一句话定性：</strong>${escapeHtml(r.oneLineSummary || '—')}</div>
         <div class="notice"><strong>!</strong><span>正式报告只呈现经过来源支持并完成审核的事实。AI 推断与资料不足项单独标记，不得作为客户事实或导出到同步文件。</span></div>
-        ${cvHtml}
-        <h2>综合匹配度评分</h2>
-        <div class="dims">${dims || '<p class="muted">—</p>'}</div>
-        <p>${escapeHtml(r.matchSummary || '')}</p>
-        <h2>公司画像</h2>
-        <table class="profile-table"><tbody>${profRows}</tbody></table>`;
-
-      if (isDD) {
-        html += `
-        <h2>工商登记核验</h2>
-        <table class="profile-table"><tbody>${regRows}</tbody></table>
-        ${r.websiteVerification ? `<h3 style="margin:14px 0 4px;color:#475569">官网内容核验</h3><p>${escapeHtml(r.websiteVerification)}</p>` : ''}
-        ${discRows ? `<h3 style="margin:14px 0 4px;color:#475569">官网信息与官方登记差异说明</h3><div class="table-wrap"><table><thead><tr><th>官网信息</th><th>官方登记 / 第三方记录</th><th>差异说明</th></tr></thead><tbody>${discRows}</tbody></table></div>` : ''}
-        <h2>法律与合规</h2>
-        ${lc.litigation ? `<p><strong>诉讼情况：</strong>${escapeHtml(lc.litigation)}</p>` : ''}
-        ${lc.administrativePenalty ? `<p><strong>行政处罚 / 检查：</strong>${escapeHtml(lc.administrativePenalty)}</p>` : ''}
-        ${lc.sanctions ? `<p><strong>制裁 / 黑名单：</strong>${escapeHtml(lc.sanctions)}</p>` : ''}
-        ${litRows ? `<div class="table-wrap" style="margin-top:8px"><table><thead><tr><th>案件 / 处罚名称</th><th>法院 / 机构</th><th>日期</th><th>摘要</th><th>来源链接</th></tr></thead><tbody>${litRows}</tbody></table></div>` : ''}
-        <h2>媒体与口碑</h2>
-        ${rep.news ? `<p><strong>新闻报道：</strong>${escapeHtml(rep.news)}</p>` : ''}
-        ${rep.industryReview ? `<p><strong>行业评价：</strong>${escapeHtml(rep.industryReview)}</p>` : ''}
-        ${rep.customerReview ? `<p><strong>客户评价：</strong>${escapeHtml(rep.customerReview)}</p>` : ''}
-        ${rep.employeeReview ? `<p><strong>员工评价：</strong>${escapeHtml(rep.employeeReview)}</p>` : ''}
-        ${rep.social ? `<p><strong>社交媒体 / 论坛：</strong>${escapeHtml(rep.social)}</p>` : ''}
-        <h2>风险评估</h2>
-        ${riskRows ? `<div class="table-wrap"><table><thead><tr><th>风险类别</th><th>等级</th><th>说明</th></tr></thead><tbody>${riskRows}</tbody></table></div>` : '<p class="muted">—</p>'}
-        ${r.verificationChecklist && r.verificationChecklist.length ? `<h2>结论与建议 · 核实清单</h2><ol>${r.verificationChecklist.map(x => `<li>${escapeHtml(x)}</li>`).join('')}</ol>` : ''}`;
-      } else {
-        html += `
-        <h2>主要产品与服务</h2>
-        ${psRows ? `<div class="table-wrap"><table><thead><tr><th>业务板块</th><th>说明</th></tr></thead><tbody>${psRows}</tbody></table></div>` : '<p class="muted">—</p>'}
-        <h2>主要客户分析</h2>
-        ${cust.overview ? `<p>${escapeHtml(cust.overview)}</p>` : ''}
-        ${contractRows ? `<div class="table-wrap" style="margin-top:8px"><table><thead><tr><th>项目 / 合同</th><th>客户</th><th>合同金额</th><th>期限</th><th>说明</th></tr></thead><tbody>${contractRows}</tbody></table></div>` : ''}
-        <h2>供应商与供应链分析</h2>
-        ${sup.overview ? `<p>${escapeHtml(sup.overview)}</p>` : ''}
-        ${supRows ? `<div class="table-wrap" style="margin-top:8px"><table><thead><tr><th>供应商 / 来源</th><th>供应品类</th><th>说明</th></tr></thead><tbody>${supRows}</tbody></table></div>` : ''}
-        ${subRows ? `<h3 style="margin:14px 0 4px;color:#475569">子公司内部供应链</h3><div class="table-wrap"><table><thead><tr><th>子公司</th><th>关系</th><th>主要交易内容</th></tr></thead><tbody>${subRows}</tbody></table></div>` : ''}
-        <h2>财务与运营概况</h2>
-        ${fin.narrative ? `<p>${escapeHtml(fin.narrative)}</p>` : ''}
-        ${finRows ? `<div class="table-wrap" style="margin-top:8px"><table><thead><tr><th>财务指标</th><th>期间 1</th><th>期间 2</th><th>同比增长</th></tr></thead><tbody>${finRows}</tbody></table></div>` : ''}
-        <h2>战略方向与发展前景</h2>
-        ${stratRows ? `<ul>${stratRows}</ul>` : '<p class="muted">—</p>'}`;
-      }
-
-      // —— 详尽可能性汇总层（核心优势 / 运营指标 / 风险汇总，两种原型共用）——
-      const strengthItems = (r.strengths || []).map(s => `<li>${escapeHtml(s)}</li>`).join('');
-      const omRows = (r.operationalMetrics || []).map(m => `<tr><td>${escapeHtml(m.metric || '—')}</td><td>${escapeHtml(m.value || '—')}</td><td>${escapeHtml(m.note || '')}</td></tr>`).join('');
-
-      html += `
-        <h2>核心优势与运营指标</h2>
-        ${strengthItems ? `<h3 style="margin:14px 0 4px;color:#475569">核心优势</h3><ul>${strengthItems}</ul>` : ''}
-        ${omRows ? `<h3 style="margin:14px 0 4px;color:#475569">关键运营指标</h3><div class="table-wrap"><table><thead><tr><th>指标</th><th>数值</th><th>说明</th></tr></thead><tbody>${omRows}</tbody></table></div>` : ''}
-        ${r.riskSummary ? `<h3 style="margin:14px 0 4px;color:#475569">潜在风险汇总</h3><p>${escapeHtml(r.riskSummary)}</p>` : ''}
-        <h2>经营情况</h2>
-        <p>${escapeHtml(r.businessModel || '—')}</p>
-        <h3 style="margin:14px 0 4px;color:#475569">收入来源</h3>${list(r.revenueStreams)}
-        <h3 style="margin:14px 0 4px;color:#475569">发展里程碑</h3>${list(r.milestones)}
-        <h3 style="margin:14px 0 4px;color:#475569">业务 / 产品服务线</h3>${list(r.businessLines)}
-        <h2>白空间隙映射（VIGOR 产品切入）</h2>${ws ? `<ul>${ws}</ul>` : '<p class="muted">—</p>'}
-        <h2>推荐定位</h2>
-        <p>${escapeHtml(r.recommendedPositioning || '—')}${r.differentiation ? ` · ${escapeHtml(r.differentiation)}` : ''}</p>
-        <h2>关键联系人</h2>
-        ${kp ? `<table><thead><tr><th>姓名</th><th>职位</th><th>联系方式</th><th>类型</th></tr></thead><tbody>${kp}</tbody></table>` : '<p class="muted">—</p>'}
-        <h2>下一步建议</h2>${steps ? `<ol>${steps}</ol>` : '<p class="muted">—</p>'}
-        ${r.competitiveLandscape ? `<h2>竞争格局</h2><p>${escapeHtml(r.competitiveLandscape)}</p>` : ''}
-        ${r.disclaimer ? `<div class="notice"><strong>!</strong><span>${escapeHtml(r.disclaimer)}</span></div>` : ''}
+        ${idxHtml}
+        ${gridHtml}
+        ${r.disclaimer ? `<div class="notice" style="margin-top:16px"><strong>!</strong><span>${escapeHtml(r.disclaimer)}</span></div>` : ''}
       `;
-      body.innerHTML = html;
+
+      body.querySelectorAll('.mod-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          const el = body.querySelector('#mod-' + chip.dataset.mod);
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+      });
+      body.querySelectorAll('.mod-head').forEach(h => {
+        h.addEventListener('click', () => { const m = h.closest('.mod'); if (m) m.classList.toggle('collapsed'); });
+      });
     }
     function renderTasks() {
-      document.getElementById('task-table').innerHTML = tasks.map(task => `<tr><td><span class="company">${task.company}</span><span class="task-sub">${task.id}</span></td><td>${task.country}</td><td>${pill(task.type, 'blue')}</td><td>${pill(task.status, task.tone)}</td><td>${task.evidence}</td><td>${task.expiry}</td><td>${task.owner}</td><td><button class="link" data-go="${task.company === 'Deep Industries' ? 'dossier' : 'tasks'}">查看</button></td></tr>`).join('');
+      const el = document.getElementById('task-table');
+      if (!el) return;
+      const liveRows = liveRuns.map(run => {
+        const req = run.request || {};
+        const info = runStatusInfo(run.status);
+        const res = run.result || {};
+        const facts = (res.facts || []).length;
+        const unknowns = (res.unknowns || []).length;
+        const ev = facts || unknowns ? `${facts} / ${facts + unknowns}` : '—';
+        const action = canViewRun(run)
+          ? `<button class="link" data-view-run="${escapeHtml(run.id)}">查看报告</button>`
+          : `<span class="task-sub">${info.label}…</span>`;
+        return `<tr>
+          <td><span class="company">${escapeHtml(req.companyName || '—')}</span><span class="task-sub">${escapeHtml((run.id || '').slice(0, 8).toUpperCase())}</span></td>
+          <td>${escapeHtml(req.country || '—')}</td>
+          <td>${pill('AI 深研', 'blue')}</td>
+          <td>${pill(info.label, info.tone)}</td>
+          <td>${ev}</td>
+          <td>—</td>
+          <td>DeepSeek</td>
+          <td>${action}</td>
+        </tr>`;
+      }).join('');
+      const seedRows = tasks.map(task => `<tr><td><span class="company">${task.company}</span><span class="task-sub">${task.id}</span></td><td>${task.country}</td><td>${pill(task.type, 'blue')}</td><td>${pill(task.status, task.tone)}</td><td>${task.evidence}</td><td>${task.expiry}</td><td>${task.owner}</td><td><button class="link" data-go="${task.company === 'Deep Industries' ? 'dossier' : 'tasks'}">查看</button></td></tr>`).join('');
+      el.innerHTML = liveRows + seedRows;
+    }
+    // 从后端加载全部持久化研究运行，刷新/重启后也能找回
+    async function loadRuns() {
+      try {
+        const res = await apiFetch(`${RESEARCH_API}/api/customer-research/research-runs`);
+        if (!res.ok) return;
+        const data = await res.json();
+        (data.runs || []).forEach(r => { if (!liveRuns.some(l => l.id === r.id)) liveRuns.push(r); });
+        renderTasks();
+        renderDiscoverList();
+      } catch (_) { /* 后端不可达时静默，保留示例数据 */ }
+    }
+    // 点击"查看报告"：取最新运行并打开报告
+    async function viewRun(runId) {
+      let run = liveRuns.find(r => r.id === runId);
+      try {
+        const res = await apiFetch(`${RESEARCH_API}/api/customer-research/research-runs/${runId}`);
+        if (res.ok) run = await res.json();
+      } catch (_) {}
+      if (!run) { showToast('未找到该研究运行'); return; }
+      const company = (run.request && run.request.companyName) || '该研究';
+      if (canViewRun(run) && run.result.report) {
+        discoverReports[company] = run.result.report;
+        go('discover'); showDiscoverReport(company);
+      } else {
+        showToast(`该研究当前状态：${runStatusInfo(run.status).label}，完成后可在此查看报告。`);
+        go('tasks');
+      }
     }
     // 客户档案：按当前调研对象生成事实列表（Deep Industries 用既有示例叙事，其余按数据库快照生成，保证调研对象一致）
     function dossierFactsForCompany(company) {
@@ -1170,6 +1286,13 @@
         tbody.innerHTML = `<tr><td colspan="6"><div class="state-box"><strong>导出记录加载失败</strong><span>${e.unreachable ? e.message : '错误：' + escapeHtml(e.message)}</span></div></td></tr>`;
       }
     }
+    // 统一的运行标签：优先请求里的公司名，其次报告 profile.fullName，兜底"报告"
+    function runLabel(r) {
+      const name = (r.request && r.request.companyName) ||
+        (r.result && r.result.report && r.result.report.profile && r.result.report.profile.fullName) ||
+        (r.result && r.result.company) || '报告';
+      return escapeHtml(name);
+    }
     // 从后端加载已完成的研究运行，填充导出选择器
     async function loadExportRuns() {
       const sel = document.getElementById('export-run-select');
@@ -1195,13 +1318,9 @@
         if (loading) loading.classList.add('hidden');
       }
     }
-    // 待审核报告选择器：从后端加载 PENDING_REVIEW 运行，填充 #review-run-select
-    function runLabel(r) {
-      const name = (r.request && r.request.companyName) ||
-        (r.result && r.result.report && r.result.report.profile && r.result.report.profile.fullName) ||
-        (r.result && r.result.company) || '报告';
-      return escapeHtml(name);
-    }
+    // —— 报告审核页：待审核运行选择器 + 真实报告载入 + 审核发布 ——
+    let reviewRuns = [];
+    // 从后端加载待审核（PENDING_REVIEW）的研究运行，填充报告审核页的运行选择器；自动选中首个
     async function loadReviewRuns() {
       const sel = document.getElementById('review-run-select');
       if (!sel) return;
@@ -1210,39 +1329,44 @@
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const data = await res.json();
         const pending = (data.runs || []).filter(r => r.status === 'PENDING_REVIEW');
+        reviewRuns = pending;
         if (!pending.length) {
           sel.innerHTML = '<option value="">暂无待审核报告</option>';
           return;
         }
-        sel.innerHTML = '<option value="">选择待审核报告…</option>' + pending.map(r => {
-          const label = `${runLabel(r)} · ${r.id.slice(0, 8)}`;
-          return `<option value="${r.id}">${label}</option>`;
-        }).join('');
-        if (pending.length) selectReviewRun(pending[0].id);
+        const current = sel.value;
+        sel.innerHTML = '<option value="">选择待审核报告…</option>' + pending.map(r => `<option value="${r.id}">${runLabel(r)} · 待审核 · ${r.id.slice(0, 8)}</option>`).join('');
+        if (current && pending.some(r => r.id === current)) sel.value = current;
+        else sel.value = pending[0].id;
+        selectReviewRun(sel.value);
       } catch (e) {
         sel.innerHTML = '<option value="">加载失败：' + (e.unreachable ? '后端不可达' : escapeHtml(e.message)) + '</option>';
       }
     }
-    async function selectReviewRun(runId) {
-      if (!runId) { renderReport(sampleReport); return; }
-      try {
-        const res = await apiFetch(`${RESEARCH_API}/api/customer-research/research-runs/${runId}`);
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const run = await res.json();
-        if (run.result && run.result.report) {
-          renderReport(run.result.report, 'report-body');
-        }
-        const statusEl = document.getElementById('report-status');
-        if (statusEl) {
-          if (run.status === 'COMPLETED') { statusEl.textContent = '已审核发布'; statusEl.className = 'pill green'; }
-          else { statusEl.textContent = '待销售负责人审核'; statusEl.className = 'pill amber'; }
-        }
-        const dateEl = document.getElementById('report-date');
-        if (dateEl && run.result && run.result.generatedAt) {
-          dateEl.textContent = '截至 ' + String(run.result.generatedAt).slice(0, 10);
-        }
-      } catch (e) {
-        showToast('加载报告失败：' + (e.unreachable ? e.message : escapeHtml(e.message)));
+    // 选中某个待审核运行后，把真实报告渲染到 #report-body，并刷新审核状态与日期
+    function selectReviewRun(runId) {
+      const statusEl = document.getElementById('report-status');
+      const dateEl = document.getElementById('report-date');
+      const body = document.getElementById('report-body');
+      if (!runId) {
+        if (body) renderReport(sampleReport);
+        if (statusEl) { statusEl.textContent = '待销售负责人审核'; statusEl.className = 'pill amber'; }
+        return;
+      }
+      const run = (reviewRuns || []).find(r => r.id === runId);
+      if (!run) { showToast('未找到该报告，请刷新列表'); return; }
+      const report = (run.result && run.result.report) || null;
+      if (body) {
+        if (report) renderReport(report);
+        else body.innerHTML = '<div class="state-box"><strong>该运行尚无报告</strong><span>AI 研究可能未完成或失败。</span></div>';
+      }
+      if (statusEl) {
+        if (run.status === 'COMPLETED') { statusEl.textContent = '已审核发布'; statusEl.className = 'pill green'; }
+        else { statusEl.textContent = '待销售负责人审核'; statusEl.className = 'pill amber'; }
+      }
+      if (dateEl) {
+        const d = run.approvedAt || run.completedAt || run.createdAt;
+        dateEl.textContent = d ? '截至 ' + new Date(d).toISOString().slice(0, 10) : '截至 —';
       }
     }
 
@@ -1391,8 +1515,20 @@
     function renderDiscoverList() {
       const el = document.getElementById('discover-list');
       if (!el) return;
-      if (!tasks.length) { el.innerHTML = '<div class="state-box"><strong>暂无背调研究</strong><span>通过上方「单公司研究」创建，完成后将在此列出并可查看报告。</span></div>'; return; }
-      el.innerHTML = tasks.map(t => `<div class="queue-item" data-discover="${escapeHtml(t.company)}"><strong>${escapeHtml(t.company)}</strong><p>${escapeHtml(t.type)} · ${escapeHtml(t.id)}</p><div class="queue-footer"><span class="pill ${t.tone || 'amber'}">${escapeHtml(t.status)}</span><button class="link" data-discover="${escapeHtml(t.company)}">查看报告</button></div></div>`).join('');
+      const items = [];
+      liveRuns.forEach(run => {
+        if (!canViewRun(run)) return;
+        const req = run.request || {};
+        const company = req.companyName || '—';
+        const info = runStatusInfo(run.status);
+        if (run.result && run.result.report) discoverReports[company] = run.result.report;
+        items.push(`<div class="queue-item" data-discover="${escapeHtml(company)}"><strong>${escapeHtml(company)}</strong><p>AI 深研 · ${escapeHtml((run.id || '').slice(0, 8).toUpperCase())}</p><div class="queue-footer"><span class="pill ${info.tone}">${info.label}</span><button class="link" data-discover="${escapeHtml(company)}">查看报告</button></div></div>`);
+      });
+      tasks.forEach(t => {
+        items.push(`<div class="queue-item" data-discover="${escapeHtml(t.company)}"><strong>${escapeHtml(t.company)}</strong><p>${escapeHtml(t.type)} · ${escapeHtml(t.id)}</p><div class="queue-footer"><span class="pill ${t.tone || 'amber'}">${escapeHtml(t.status)}</span><button class="link" data-discover="${escapeHtml(t.company)}">查看报告</button></div></div>`);
+      });
+      if (!items.length) { el.innerHTML = '<div class="state-box"><strong>暂无背调研究</strong><span>通过上方「单公司研究」创建，完成后将在此列出并可查看报告。</span></div>'; return; }
+      el.innerHTML = items.join('');
     }
     function showDiscoverReport(company) {
       const rep = discoverReports[company];
@@ -1417,6 +1553,7 @@
       const dossierNav = event.target.closest('.side-list [data-section]'); if (dossierNav) { setDossierSection(dossierNav.dataset.section); return; }
       const dossierView = event.target.closest('[data-dossier]'); if (dossierView) { currentDossierCompany = dossierView.dataset.dossier; go('dossier'); return; }
       const followupNav = event.target.closest('[data-followup]'); if (followupNav) { openFollowup(followupNav.dataset.followup); return; }
+      const viewRunBtn = event.target.closest('[data-view-run]'); if (viewRunBtn) { viewRun(viewRunBtn.dataset.viewRun); return; }
       const discView = event.target.closest('[data-discover]'); if (discView) { showDiscoverReport(discView.dataset.discover); return; }
       const companyAction = event.target.closest('[data-company]'); if (companyAction) {
         const company = findCompany(companyAction.dataset.company);
@@ -1495,17 +1632,26 @@
       btn.disabled = true; btn.textContent = '发布中…';
       try {
         const res = await apiFetch(`${RESEARCH_API}/api/customer-research/research-runs/${runId}/approve`, {
-          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ approver: 'Monk Chen' })
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ approver: 'Monk Chen' })
         });
-        if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.error || ('HTTP ' + res.status)); }
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.error || ('HTTP ' + res.status));
+        }
         const run = await res.json();
         const statusEl = document.getElementById('report-status');
         if (statusEl) { statusEl.textContent = '已审核发布'; statusEl.className = 'pill green'; }
         showToast(`报告已审核发布（审核人：${run.approvedBy || 'Monk Chen'} · 版本 v${run.version || 1}），已落库并生成审计记录。`);
         loadReviewRuns(); loadExportRuns();
-      } catch (e) { showToast('审核发布失败：' + (e.unreachable ? e.message : escapeHtml(e.message))); }
-      finally { btn.disabled = false; btn.textContent = '审核通过并发布'; }
+      } catch (e) {
+        showToast('审核发布失败：' + (e.unreachable ? e.message : escapeHtml(e.message)));
+      } finally {
+        btn.disabled = false; btn.textContent = '审核通过并发布';
+      }
     });
+    // 报告审核页：切换待审核运行
     const reviewSel = document.getElementById('review-run-select');
     if (reviewSel) reviewSel.addEventListener('change', e => selectReviewRun(e.target.value));
 
@@ -1533,12 +1679,21 @@
       showToast(`已创建 AI 研究任务 ${runId.slice(0, 8)}，DeepSeek 正在调研 ${payload.companyName}…`);
       pollRun(runId, payload);
     }
+    function upsertLiveRun(run) {
+      const i = liveRuns.findIndex(l => l.id === run.id);
+      if (i >= 0) liveRuns[i] = Object.assign({}, liveRuns[i], run);
+      else liveRuns.unshift(run);
+    }
     function pollRun(runId, payload) {
+      upsertLiveRun({ id: runId, request: payload, status: 'QUEUED', result: null, createdAt: new Date().toISOString() });
+      renderTasks(); renderDiscoverList();
       const timer = setInterval(async () => {
         try {
           const res = await apiFetch(`${RESEARCH_API}/api/customer-research/research-runs/${runId}`);
           if (!res.ok) throw new Error('run not found');
           const run = await res.json();
+          upsertLiveRun(run);
+          renderTasks(); renderDiscoverList();
           if (run.status === 'PENDING_REVIEW' || run.status === 'COMPLETED') {
             clearInterval(timer);
             const r = run.result || {};
@@ -1546,28 +1701,12 @@
             const inferences = (r.inferences || []).length;
             const unknowns = (r.unknowns || []).length;
             const opps = (r.opportunities || []).length;
-            tasks.unshift({
-              company: payload.companyName,
-              id: 'RUN-' + runId.slice(0, 8).toUpperCase(),
-              country: r.country || payload.country || '-',
-              type: 'AI 深研',
-              status: '待审核',
-              evidence: `${facts} / ${facts + unknowns}`,
-              expiry: '—',
-              owner: 'DeepSeek V4 Flash',
-              tone: 'amber',
-              live: true
-            });
-            renderTasks();
-            if (r.report) {
-              renderReport(r.report);
-              document.getElementById('report-date').textContent = '截至 ' + (r.generatedAt || new Date().toISOString()).slice(0, 10);
-              discoverReports[payload.companyName] = r.report;
-            }
-            renderDiscoverList();
+            const company = (run.request && run.request.companyName) || payload.companyName;
+            if (r.report) { renderReport(r.report); discoverReports[company] = r.report; }
+            renderTasks(); renderDiscoverList();
             loadReviewRuns(); loadExportRuns();
             showToast(`AI 研究完成：${payload.companyName} — ${facts} 事实 / ${inferences} 推断 / ${unknowns} 未知 / ${opps} 机会信号。待人工审核。`);
-            go('discover'); showDiscoverReport(payload.companyName);
+            go('discover'); showDiscoverReport(company);
           } else if (run.status === 'FAILED') {
             clearInterval(timer);
             showToast(`AI 研究失败：${run.error || '未知错误'}。请检查后端密钥或网络后重试。`);
@@ -1584,7 +1723,9 @@
     document.getElementById('add-source').addEventListener('click', () => alert('原型提示：新增来源必须记录国家、许可、可采字段、快照/导出规则和复核日期。'));
     document.getElementById('switch-diligence').addEventListener('click', () => { renderReport(sampleReport); const s = document.getElementById('report-status'); if (s) { s.textContent = '示例预览'; s.className = 'pill slate'; } });
     document.getElementById('switch-analysis').addEventListener('click', () => { renderReport(sampleReportAnalysis); const s = document.getElementById('report-status'); if (s) { s.textContent = '示例预览'; s.className = 'pill slate'; } });
-    renderPriority(); loadDatabase(); loadDatabaseStatus(); renderProspects(); renderTasks(); renderFacts(); renderSources(); renderExports(); loadReviewRuns(); renderReport(sampleReport); renderDiscoverList(); showDiscoverReport('Deep Industries'); discovery('company');
+    renderCountrySelect(document.getElementById('country'), false);
+    renderCountryFilter(document.getElementById('db-country-filter'));
+    renderPriority(); loadDatabase(); loadDatabaseStatus(); renderProspects(); renderTasks(); renderFacts(); renderSources(); renderExports(); renderReport(sampleReport); loadReviewRuns(); renderDiscoverList(); showDiscoverReport('Deep Industries'); discovery('company'); loadRuns();
     // 深链恢复：若地址栏带 #page 且为合法页面则跳转，否则停留在默认工作台
     (function restoreDeepLink() {
       const p = location.hash.slice(1);
