@@ -178,7 +178,8 @@ router.get('/database', (_req: AuthRequest, res: Response) => {
 
 router.get('/database/status', (_req: AuthRequest, res: Response) => res.json(getStatus()));
 
-router.post('/database/refresh', async (_req: AuthRequest, res: Response) => {
+router.post('/database/refresh', async (req: AuthRequest, res: Response) => {
+  if (req.user?.role !== 'ADMIN') return res.status(403).json({ error: 'forbidden', detail: '仅管理员可执行数据库刷新' });
   try {
     const status = await refresh();
     return res.json({ ok: true, status });
@@ -188,6 +189,7 @@ router.post('/database/refresh', async (_req: AuthRequest, res: Response) => {
 });
 
 router.post('/database/config', async (req: AuthRequest, res: Response) => {
+  if (req.user?.role !== 'ADMIN') return res.status(403).json({ error: 'forbidden', detail: '仅管理员可修改数据库目标配置' });
   try {
     const status = await setRequirements(req.body || {});
     return res.json({ ok: true, status });

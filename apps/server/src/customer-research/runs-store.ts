@@ -7,9 +7,10 @@
 //  - 内存 Map 为权威索引，落盘为同步 writeFileSync（研究运行写入频率极低，短暂阻塞可接受）。
 //  - 状态高频变更时通过 50ms 防抖合并写，避免一次研究运行多次全量落盘。
 //  - 生产环境应替换为 PostgreSQL / 自有数据库，此处仅满足原型"重启不丢"的硬性要求。
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+import { atomicWriteJsonSync, queueWriteJson } from './atomic-json.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = process.env.DATA_DIR || join(HERE, '..', 'data');
@@ -40,12 +41,11 @@ function load() {
   }
 }
 
-// 将内存中的全部 run 立即落盘（同步）。返回是否成功。
+// 将内存中的全部 run 立即落盘（原子写：tmp + rename）。返回是否成功。
 export function flush() {
   try {
-    if (!existsSync(DATA_DIR)) mkdirSync(DATA_DIR, { recursive: true });
     const arr = [...runs.values()];
-    writeFileSync(RUNS_FILE, JSON.stringify(arr, null, 2), 'utf-8');
+    atomicWriteJsonSync(RUNS_FILE, arr);
     return true;
   } catch (e) {
     console.error(`[runs-store] 写入 ${RUNS_FILE} 失败：${e.message}`);
@@ -54,11 +54,14 @@ export function flush() {
 }
 
 // 防抖落盘：状态高频变更时合并为一次写，降低 I/O 抖动。
+// 通过 atomic-json 的串行写队列执行，避免并发写交错。
 function scheduleFlush() {
   if (saveTimer) return;
   saveTimer = setTimeout(() => {
     saveTimer = null;
-    flush();
+    const arr = [...runs.values()];
+    queueWriteJson(RUNS_FILE, arr).catch((e) =>
+      console.error(`[runs-store] 写入 ${RUNS_FILE} 失败：${e.message}`));
   }, 50);
   if (saveTimer.unref) saveTimer.unref();
 }

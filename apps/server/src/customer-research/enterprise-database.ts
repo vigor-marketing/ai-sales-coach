@@ -2,13 +2,14 @@
 // 企业数据库（客户背调 / 主动开发名单的数据底座）
 // 内存存储 + 按 enterprise-requirements.json 的准入规则做需求驱动刷新。
 // 设计要点：
-//  - 准入规则集中在 requirements：全量国家（193 国）/ 行业 / 员工 100+（或未知待复核）/ TTL 30 天 / 仅官方可核验来源。
+//  - 准入规则集中在 requirements：5 国 / 5 行业 / 员工 100+（或未知待复核）/ TTL 30 天 / 仅官方可核验来源。
 //  - 刷新（refresh）按规则重新校验全部主体，剔除 <100 员工、标记过期、生成变更日志。
 //  - 调度器（setInterval）按 intervalSeconds 定时刷新；真实数据源接入后替换 collectProfiles()。
 //  - 生产环境应替换为 PostgreSQL / 自有数据库，并接入审计与来源快照。
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+import { atomicWriteJsonSync, queueWriteJson } from './atomic-json.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const DEPLOY_DIR = join(HERE, 'deploy');
@@ -22,11 +23,11 @@ const DEFAULT_INTERVAL_SECONDS = Number(process.env.DB_REFRESH_SECONDS || 0) || 
 const MAX_CHANGELOG = 50;
 
 // 目标区域 -> 国家集合（覆盖所有大洲与主要区域；global = 全部国家；custom 由用户手动勾选）
-const ALL_COUNTRIES = ['China','Japan','South Korea','North Korea','Mongolia','India','Pakistan','Bangladesh','Sri Lanka','Nepal','Bhutan','Maldives','Afghanistan','Kazakhstan','Uzbekistan','Turkmenistan','Kyrgyzstan','Tajikistan','Iran','Iraq','Syria','Lebanon','Israel','Jordan','Turkey','Armenia','Azerbaijan','Georgia','Cyprus','Indonesia','Malaysia','Singapore','Thailand','Vietnam','Philippines','Myanmar','Cambodia','Laos','Brunei','Timor-Leste','Hong Kong','Macau','Taiwan','Norway','Sweden','Finland','Denmark','Iceland','Estonia','Latvia','Lithuania','Poland','Germany','Netherlands','Belgium','Luxembourg','France','United Kingdom','Ireland','Portugal','Spain','Andorra','Monaco','Switzerland','Austria','Liechtenstein','Italy','San Marino','Vatican','Czech Republic','Slovakia','Hungary','Slovenia','Croatia','Bosnia and Herzegovina','Serbia','Montenegro','Kosovo','North Macedonia','Albania','Greece','Romania','Bulgaria','Moldova','Ukraine','Belarus','Russia','Egypt','Libya','Tunisia','Algeria','Morocco','Western Sahara','Mauritania','Senegal','Mali','Guinea','Sierra Leone','Liberia','Côte d\'Ivoire','Burkina Faso','Ghana','Togo','Benin','Nigeria','Niger','Chad','Cameroon','Equatorial Guinea','Gabon','Republic of the Congo','Democratic Republic of the Congo','Central African Republic','Sudan','South Sudan','Ethiopia','Eritrea','Djibouti','Somalia','Kenya','Uganda','Tanzania','Rwanda','Burundi','Angola','Zambia','Malawi','Mozambique','Zimbabwe','Botswana','Namibia','South Africa','Lesotho','Eswatini','Madagascar','Comoros','Seychelles','Mauritius','Cape Verde','São Tomé and Príncipe','Gambia','Guinea-Bissau','Canada','United States','Mexico','Greenland','Belize','Guatemala','Honduras','El Salvador','Nicaragua','Costa Rica','Panama','Cuba','Jamaica','Haiti','Dominican Republic','Puerto Rico','Bahamas','Barbados','Trinidad and Tobago','Saint Lucia','Antigua and Barbuda','Grenada','Bermuda','Brazil','Argentina','Chile','Peru','Colombia','Venezuela','Ecuador','Bolivia','Paraguay','Uruguay','Guyana','Suriname','French Guiana','Australia','New Zealand','Papua New Guinea','Fiji','Solomon Islands','Vanuatu','Samoa','Tonga','Kiribati','Tuvalu','Micronesia','Marshall Islands','Palau','Nauru','New Caledonia'];
+const ALL_COUNTRIES = ['China','Japan','South Korea','North Korea','Mongolia','India','Pakistan','Bangladesh','Sri Lanka','Nepal','Bhutan','Maldives','Afghanistan','Kazakhstan','Uzbekistan','Turkmenistan','Kyrgyzstan','Tajikistan','Iran','Iraq','Syria','Lebanon','Israel','Jordan','Bahrain','Kuwait','Oman','Qatar','Saudi Arabia','United Arab Emirates','Yemen','Turkey','Armenia','Azerbaijan','Georgia','Cyprus','Indonesia','Malaysia','Singapore','Thailand','Vietnam','Philippines','Myanmar','Cambodia','Laos','Brunei','Timor-Leste','Hong Kong','Macau','Taiwan','Norway','Sweden','Finland','Denmark','Iceland','Estonia','Latvia','Lithuania','Poland','Germany','Netherlands','Belgium','Luxembourg','France','United Kingdom','Ireland','Portugal','Spain','Andorra','Monaco','Switzerland','Austria','Liechtenstein','Italy','San Marino','Vatican','Malta','Czech Republic','Slovakia','Hungary','Slovenia','Croatia','Bosnia and Herzegovina','Serbia','Montenegro','Kosovo','North Macedonia','Albania','Greece','Romania','Bulgaria','Moldova','Ukraine','Belarus','Russia','Egypt','Libya','Tunisia','Algeria','Morocco','Western Sahara','Mauritania','Senegal','Mali','Guinea','Sierra Leone','Liberia','Côte d\'Ivoire','Burkina Faso','Ghana','Togo','Benin','Nigeria','Niger','Chad','Cameroon','Equatorial Guinea','Gabon','Republic of the Congo','Democratic Republic of the Congo','Central African Republic','Sudan','South Sudan','Ethiopia','Eritrea','Djibouti','Somalia','Kenya','Uganda','Tanzania','Rwanda','Burundi','Angola','Zambia','Malawi','Mozambique','Zimbabwe','Botswana','Namibia','South Africa','Lesotho','Eswatini','Madagascar','Comoros','Seychelles','Mauritius','Cape Verde','São Tomé and Príncipe','Gambia','Guinea-Bissau','Canada','United States','Mexico','Greenland','Belize','Guatemala','Honduras','El Salvador','Nicaragua','Costa Rica','Panama','Cuba','Jamaica','Haiti','Dominican Republic','Puerto Rico','Bahamas','Barbados','Trinidad and Tobago','Saint Lucia','Antigua and Barbuda','Grenada','Bermuda','Brazil','Argentina','Chile','Peru','Colombia','Venezuela','Ecuador','Bolivia','Paraguay','Uruguay','Guyana','Suriname','French Guiana','Australia','New Zealand','Papua New Guinea','Fiji','Solomon Islands','Vanuatu','Samoa','Tonga','Kiribati','Tuvalu','Micronesia','Marshall Islands','Palau','Nauru','New Caledonia'];
 const REGION_COUNTRIES = {
   global: ALL_COUNTRIES,
   asia: ['China','Japan','South Korea','North Korea','Mongolia','India','Pakistan','Bangladesh','Sri Lanka','Nepal','Bhutan','Maldives','Afghanistan','Kazakhstan','Uzbekistan','Turkmenistan','Kyrgyzstan','Tajikistan','Iran','Iraq','Syria','Lebanon','Israel','Jordan','Turkey','Armenia','Azerbaijan','Georgia','Cyprus','Indonesia','Malaysia','Singapore','Thailand','Vietnam','Philippines','Myanmar','Cambodia','Laos','Brunei','Timor-Leste','Hong Kong','Macau','Taiwan'],
-  europe: ['Norway','Sweden','Finland','Denmark','Iceland','Estonia','Latvia','Lithuania','Poland','Germany','Netherlands','Belgium','Luxembourg','France','United Kingdom','Ireland','Portugal','Spain','Andorra','Monaco','Switzerland','Austria','Liechtenstein','Italy','San Marino','Vatican','Czech Republic','Slovakia','Hungary','Slovenia','Croatia','Bosnia and Herzegovina','Serbia','Montenegro','Kosovo','North Macedonia','Albania','Greece','Romania','Bulgaria','Moldova','Ukraine','Belarus','Russia'],
+  europe: ['Norway','Sweden','Finland','Denmark','Iceland','Estonia','Latvia','Lithuania','Poland','Germany','Netherlands','Belgium','Luxembourg','France','United Kingdom','Ireland','Portugal','Spain','Andorra','Monaco','Switzerland','Austria','Liechtenstein','Italy','San Marino','Vatican','Malta','Czech Republic','Slovakia','Hungary','Slovenia','Croatia','Bosnia and Herzegovina','Serbia','Montenegro','Kosovo','North Macedonia','Albania','Greece','Romania','Bulgaria','Moldova','Ukraine','Belarus','Russia'],
   africa: ['Egypt','Libya','Tunisia','Algeria','Morocco','Western Sahara','Mauritania','Senegal','Mali','Guinea','Sierra Leone','Liberia','Côte d\'Ivoire','Burkina Faso','Ghana','Togo','Benin','Nigeria','Niger','Chad','Cameroon','Equatorial Guinea','Gabon','Republic of the Congo','Democratic Republic of the Congo','Central African Republic','Sudan','South Sudan','Ethiopia','Eritrea','Djibouti','Somalia','Kenya','Uganda','Tanzania','Rwanda','Burundi','Angola','Zambia','Malawi','Mozambique','Zimbabwe','Botswana','Namibia','South Africa','Lesotho','Eswatini','Madagascar','Comoros','Seychelles','Mauritius','Cape Verde','São Tomé and Príncipe','Gambia','Guinea-Bissau'],
   north_america: ['Canada','United States','Mexico','Greenland','Belize','Guatemala','Honduras','El Salvador','Nicaragua','Costa Rica','Panama','Cuba','Jamaica','Haiti','Dominican Republic','Puerto Rico','Bahamas','Barbados','Trinidad and Tobago','Saint Lucia','Antigua and Barbuda','Grenada','Bermuda'],
   south_america: ['Brazil','Argentina','Chile','Peru','Colombia','Venezuela','Ecuador','Bolivia','Paraguay','Uruguay','Guyana','Suriname','French Guiana'],
@@ -159,6 +160,59 @@ const db = {
   collect: null // 可注入的真实数据收集器（异步函数 -> 原始主体数组）
 };
 
+// —— P1：企业数据库状态持久化（重启不丢）——
+// profiles / changelog / prospect / lastUpdatedAt 统一落盘到 DATA_DIR/enterprise.json
+// （requirements 单独落盘到 deploy/enterprise-requirements.json，逻辑见 saveRequirementsFile）
+const ENTERPRISE_FILE = process.env.ENTERPRISE_DATA_PATH ||
+  join(process.env.DATA_DIR || join(HERE, '..', 'data'), 'enterprise.json');
+let persistTimer = null;
+
+// 将内存中的数据库状态原子落盘（立即执行，供进程退出/手动刷新使用）
+export function flushEnterpriseDb() {
+  try {
+    atomicWriteJsonSync(ENTERPRISE_FILE, {
+      profiles: [...db.profiles.values()],
+      changelog: db.changelog,
+      lastUpdatedAt: db.lastUpdatedAt,
+      nextScheduledAt: db.nextScheduledAt,
+      intervalSeconds: db.intervalSeconds
+    });
+    return true;
+  } catch (e) {
+    console.error(`[enterprise-database] 写入 ${ENTERPRISE_FILE} 失败：${e.message}`);
+    return false;
+  }
+}
+
+// 防抖落盘：状态频繁变更（refresh/markProspect）时合并为一次写，降低 I/O 抖动
+function schedulePersist() {
+  if (persistTimer) return;
+  persistTimer = setTimeout(() => {
+    persistTimer = null;
+    flushEnterpriseDb();
+  }, 50);
+  if (persistTimer.unref) persistTimer.unref();
+}
+
+// 启动时从磁盘加载数据库状态，与 seed/refresh 结果合并
+function loadEnterpriseDbState() {
+  try {
+    if (!existsSync(ENTERPRISE_FILE)) return;
+    const parsed = JSON.parse(readFileSync(ENTERPRISE_FILE, 'utf-8'));
+    if (parsed && Array.isArray(parsed.profiles)) {
+      for (const p of parsed.profiles) {
+        if (p && p.id) db.profiles.set(p.id, p);
+      }
+    }
+    if (Array.isArray(parsed && parsed.changelog)) db.changelog = parsed.changelog.slice(0, MAX_CHANGELOG);
+    if (parsed && parsed.lastUpdatedAt) db.lastUpdatedAt = parsed.lastUpdatedAt;
+    if (parsed && parsed.nextScheduledAt) db.nextScheduledAt = parsed.nextScheduledAt;
+    if (parsed && parsed.intervalSeconds) db.intervalSeconds = parsed.intervalSeconds;
+  } catch (e) {
+    console.error(`[enterprise-database] 读取 ${ENTERPRISE_FILE} 失败：${e.message}`);
+  }
+}
+
 function computeNext(s) {
   return new Date(Date.now() + s * 1000).toISOString();
 }
@@ -197,6 +251,9 @@ export async function refresh() {
     const p = normalizeProfile(raw, reqs, retrievedAt);
     const prev = prevById.get(p.id);
     if (prev) {
+      // 保留用户手动设置的 prospect 标记（数据源刷新不应覆盖用户动作）
+      p.prospect = Boolean(prev.prospect);
+      p.prospectTone = p.prospect ? 'amber' : 'slate';
       if (prev.included && !p.included) {
         pushChangelog({ id: p.id, company: p.company, change: 'excluded', detail: p.exclusionReason });
       } else if (prev.status !== p.status) {
@@ -238,6 +295,7 @@ export async function refresh() {
   db.profiles = next;
   db.lastUpdatedAt = retrievedAt;
   db.nextScheduledAt = db.intervalSeconds > 0 ? computeNext(db.intervalSeconds) : null;
+  schedulePersist(); // P1：刷新结果落盘，重启不丢
   return getStatus();
 }
 
@@ -288,6 +346,7 @@ export function markProspect(id, added) {
   p.prospect = Boolean(added);
   p.prospectTone = p.prospect ? 'amber' : 'slate';
   pushChangelog({ id, company: p.company, change: 'prospect', detail: p.prospect ? '加入主动开发' : '移出主动开发' });
+  schedulePersist(); // P1：prospect 变更落盘，重启不丢
   return p;
 }
 
@@ -349,6 +408,8 @@ export function initEnterpriseDatabase(opts = {}) {
     intervalSeconds: FREQUENCY_SECONDS[base.refreshFrequency || 'daily'] ?? (base.intervalSeconds || 86400)
   };
   if (typeof opts.collect === 'function') db.collect = opts.collect;
+  // P1：加载上次持久化的数据库状态（prospect 标记 / changelog / 更新时间）
+  loadEnterpriseDbState();
   // 首次或文件缺新字段时，持久化完整 schema
   const complete = base.region && base.targetCount && base.refreshFrequency;
   if (!loaded || !complete) saveRequirementsFile(db.requirements);
@@ -380,4 +441,5 @@ export function _resetForTest() {
   db.changelog = [];
   db.lastUpdatedAt = null;
   db.nextScheduledAt = null;
+  if (persistTimer) { clearTimeout(persistTimer); persistTimer = null; }
 }

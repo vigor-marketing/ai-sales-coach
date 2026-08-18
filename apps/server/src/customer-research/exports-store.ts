@@ -2,10 +2,11 @@
 // 导出审计日志（本地 JSON 文件）
 // 与 runs-store 同一 DATA_DIR，记录每次导出的时间 / runId / 主体 / 格式 / 行数，
 // 供前端"导出"页展示审计轨迹，也满足"导出需可审计"的合规要求。
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { randomUUID } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+import { atomicWriteJsonSync, queueWriteJson } from './atomic-json.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = process.env.DATA_DIR || join(HERE, '..', 'data');
@@ -29,8 +30,7 @@ function load() {
 
 function flush() {
   try {
-    if (!existsSync(DATA_DIR)) mkdirSync(DATA_DIR, { recursive: true });
-    writeFileSync(EXPORTS_FILE, JSON.stringify(audits, null, 2), 'utf-8');
+    atomicWriteJsonSync(EXPORTS_FILE, audits);
     return true;
   } catch (e) {
     console.error(`[exports-store] 写入 ${EXPORTS_FILE} 失败：${e.message}`);
@@ -38,7 +38,7 @@ function flush() {
   }
 }
 
-// 记录一次导出，返回完整审计条目；立即落盘。
+// 记录一次导出，返回完整审计条目；立即落盘（原子写）。
 export function recordExport(params: {
   runId?: string | null;
   company?: string | null;
