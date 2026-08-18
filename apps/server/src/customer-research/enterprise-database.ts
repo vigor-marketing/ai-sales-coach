@@ -2,7 +2,7 @@
 // 企业数据库（客户背调 / 主动开发名单的数据底座）
 // 内存存储 + 按 enterprise-requirements.json 的准入规则做需求驱动刷新。
 // 设计要点：
-//  - 准入规则集中在 requirements：5 国 / 5 行业 / 员工 100+（或未知待复核）/ TTL 30 天 / 仅官方可核验来源。
+//  - 准入规则集中在 requirements：全量国家（193 国）/ 行业 / 员工 100+（或未知待复核）/ TTL 30 天 / 仅官方可核验来源。
 //  - 刷新（refresh）按规则重新校验全部主体，剔除 <100 员工、标记过期、生成变更日志。
 //  - 调度器（setInterval）按 intervalSeconds 定时刷新；真实数据源接入后替换 collectProfiles()。
 //  - 生产环境应替换为 PostgreSQL / 自有数据库，并接入审计与来源快照。
